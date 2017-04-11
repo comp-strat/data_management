@@ -1,0 +1,945 @@
+Variable    Start   End     Field   Data
+Name        Pos.    Pos.    Length  Type    Description
+
+NCESSCH     0001    0012    12      AN      ID assigned by NCES to each school.
+   +FIPST   0001    0002    2       AN      Federal Information Processing Standards, FIPS state code.
+   +LEAID   0001    0007    7       AN      ID assigned by NCES to system.  NOTE: Position # 0001-0002 is the FIPS state code for the
+                                            location of the school, and position # 0003-0007 is the agency code.
+   +SCHNO   0008    0012    5       AN      Unique number for each school within a LEA.
+                                            NOTE: By combining FIPS state code with SCHNO, each school can be uniquely identified
+                                            within the total file.
+STID02      0013    0026    14      AN      State's own ID for the education agency.
+SEASCH02    0027    0046    20      AN      State's own ID for the school.
+LEANM02     0047    0106    60      AN      Name of the education agency which operates this school.
+SCHNAM02    0107    0156    50      AN      Name of the school.
+                                            NOTE: Throughout the remainder of this file, the following codes may appear as representing
+                                            missing values whenever they are present in the data or the documentation.
+                                            M - when data are missing; that is, a value is expected but none was measured.
+                                            N - when data are not applicable; that is, a value is neither expected nor measured.
+PHONE02     0157    0166    10      AN      Telephone number of school.
+                                            NOTE: Position # 0157-0159 is the area code, and position #0160-0166 is the exchange and
+                                            number.
+MSTREE02    0167    0196    30      AN      The mailing address of the school -- may be a street address, a Post Office box number, or,
+                                            if verified that there is no address beyond CITY, STATE, and ZIP, the character "N."
+MCITY02     0197    0226    30      AN      City name of the mailing address.
+MSTATE02    0227    0228    2       AN      Two-letter U.S. Postal Service abbreviation of the state where the mailing address is
+                                            located.
+MZIP02      0229    0233    5       AN      Five-digit U.S. Postal Service ZIP code for the mailing address.
+MZIP402     0234    0237    4       AN      If the mailing address has been assigned the additional four-digit ZIP+4, this field
+                                            contains that number; otherwise, this field is blank.
+LSTREE02    0238    0267    30      AN      Location Address.
+LCITY02     0268    0297    30      AN      Location City.
+LSTATE02    0298    0299    2       AN      Location State (PO Abbreviation).
+LZIP02      0300    0304    5       AN      Location 5 digit ZIP Code.
+LZIP402     0305    0308    4       AN      Location +4 ZIP code.
+TYPE02      0309    0309    1       AN      NCES code for type of school:
+                                            1 = Regular school
+                                            2 = Special education school
+                                            3 = Vocational school
+                                            4 = Other/alternative school
+STATUS02    0310    0310    1       AN      NCES code for the school status:
+                                            1 = School was operational at the time of the last report and is currently operational.
+                                            2 = School has closed since the time of the last report.
+                                            3 = School has been opened since the time of the last report.
+                                            4 = School was operational at the time of the last report but was not on the CCD list at
+                                            that time.
+                                            5 = School was listed on previous year's CCD school universe as being affiliated with a
+                                            different education agency.
+                                            6 = School is temporarily closed and may re-open in three years.
+                                            7 = School is scheduled to be operational within two years.
+LOCALE02    0311    0311    1       AN      NCES code for location of the school relative to populous areas:
+					    1 =	Large City: A principal city of a Metropolitan Core Based Statistical Area (CBSA), with the city having a population greater than or equal to 250,000.
+				            2 =	Mid-size City: A principal city of a Metropolitan CBSA, with the city having a population less than 250,000.
+					    3 =	Urban Fringe of a Large City: Any incorporated place, Census designated place, or non-place territory within a Metropolitan CBSA of a Large City and defined as urban by the Census Bureau.
+					    4 =	Urban Fringe of a Mid-size City: Any incorporated place, Census designated place, or non-place territory within a CBSA of a Mid-size City and defined as urban by the Census Bureau.
+					    5 =	Large Town: An incorporated place or Census designated place with a population greater than or equal to 25,000 and located outside a Metropolitan CBSA or inside a Micropolitan CBSA.
+					    6 =	Small Town: An incorporated place or Census designated place with population less than 25,000 and greater than or equal to 2,500 and located outside a Metropolitan CBSA or inside a Micropolitan CBSA.
+					    7 =	Rural, outside CBSA: Any incorporated place, Census designated place, or non-place territory not within a Metropolitan CBSA or within a Micropolitan CBSA and defined as rural by the Census Bureau.
+					    8 =	Rural, inside CBSA: Any incorporated place, Census designated place, or non-place territory within a Metropolitan CBSA and defined as rural by the Census Bureau.
+INOUT02     0312    0312    1       AN      A flag indicating whether the school's physical location is located inside or outside
+                                            the city or town limits.  The following codes are used:
+                                            1 = Inside the city or town limits
+                                            2 = Outside the city or town limits
+LATCOD02    0313    0322    10      AN      Latitude: The first 3 numbers of the code represent the number of degrees from the equator;
+                                            the last 6 digits represent the fraction of the next degree carried out to six decimal places,
+                                            with an implied decimal.
+LONCOD02    0323    0332    10      AN      Longitude: The first 3 numbers of the code represent the number of degrees from the prime
+                                            meridian; the last 6 digits represent the fraction of the next degree carried out to six
+                                            decimal places, with an implied decimal.
+CONUM02     0333    0337     5      AN      FIPS county number.NOTE: Position #0333-0334 is the FIPS state number, and position
+                                            #0335-0337 is the FIPS number for county within state.
+CONAME02    0338    0367    30      AN      Name of county.
+FTE02       0368    0372    5*      N       Total Classroom Teachers.  Full-time equivalency reported to the nearest tenth; field
+                                            includes one explicit decimal.
+GSLO02      0373    0374    2       AN      School low grade offered. The following codes are used:
+                                            UG = Ungraded
+                                            PK = Prekindergarten
+                                            KG = Kindergarten
+                                            01 -- 12 = First through Twelfth grade
+                                            00 = School had no students reported
+                                            UG and 00 each occurs only in isolation from other codes.  When one of these does occur, it
+                                            is both the lowest and the highest grade.
+GSHI02      0375    0376    2       AN      School high grade offered.  The following codes are used:
+                                            UG = Ungraded
+                                            PK = Prekindergarten
+                                            KG = Kindergarten
+                                            01 -- 12 = First through Twelfth grade
+                                            00 = School had no students reported
+                                            UG and 00 each occurs only in isolation from other codes.  When one of these does occur, it
+                                            is both the lowest and the highest grade.  GSLO01 and GSHI01 add up to the Grade Span of
+                                            the school.
+LEVEL02     0377    0377    1       AN      School Level.  The following codes were calculated from the school's corresponding GSLO and GSHI
+                                            values:
+                                            1 = Primary (low graded = PK through 03; high grade = PK through 08)
+                                            2 = Middle (low grade = 04 through 07; high grade = 04 through 09)
+                                            3 = High (low grade = 07 through 12; high grade = 12 only)
+                                            4 = Other (any other configuration not falling within the above three categories, including
+                                            Ungraded)
+
+TITLEI02    0378    0378    1       AN      Title I Eligible School.  A Title I school designated under appropriate state and federal
+                                            regulations as being eligible for participation in programs authorized by Title I of Public
+                                            Law 103-382.
+STITLI02    0379    0379    1       AN      School-wide Title I.  A program in which all the pupils in a school are designated under
+                                            appropriate state and federal regulations as being eligible for participation in programs
+                                            authorized by Title I of Public Law 103-382.
+MAGNET02    0380    0380    1       AN      Magnet school.  Regardless of the source of funding, a magnet school or program is a
+                                            special school or program designed to attract students of different racial/ethnic
+                                            background for the purpose of reducing, preventing, or eliminating racial isolation and/or
+                                            to provide an academic or social focus on a particular theme.
+CHARTR02    0381    0381    1       AN      Charter school.  A school that provides free elementary and/or secondary education to
+                                            eligible students under a specific charter granted by the state legislature or other
+                                            appropriate authority.
+FRELCH02    0382    0385    4       N       Count of students eligible to participate in the Free Lunch Program under the National
+                                            School Lunch Act.
+REDLCH02    0386    0389    4       N       Count of students eligible to participate in the Reduced-price Lunch Program under the
+                                            National School Lunch Act.
+TOTFRL02    0390    0393    4       N       Total of Free Lunch Eligible and Reduced-Price Lunch Eligible. The total is only available
+                                            if both of the details (or the total) were reported.
+MIGRNT02    0394    0397    4       N       Migrant students enrolled in previous year.  Cumulative unduplicated (within school) number
+                                            of migrant students, as defined under 34 CFR 200.40, enrolled anytime during the previous
+                                            regular school year.
+PK02        0398    0401    4       N       Total Prekindergarten students.
+AMPKM02     0402    0405    4       N       Prekindergarten students - American Indian/Alaskan Native - male.
+AMPKF02     0406    0409    4       N       Prekindergarten students - American Indian/Alaskan Native - female.
+AMPKU02     0410    0413    4       N       Prekindergarten students - American Indian/Alaskan Native - gender unknown.
+ASPKM02     0414    0417    4       N       Prekindergarten students - Asian/Pacific Islander - male.
+ASPKF02     0418    0421    4       N       Prekindergarten students - Asian/Pacific Islander - female.
+ASPKU02     0422    0425    4       N       Prekindergarten students - Asian/Pacific Islander - gender unknown.
+HIPKM02     0426    0429    4       N       Prekindergarten students - Hispanic - male.
+HIPKF02     0430    0433    4       N       Prekindergarten students - Hispanic - female.
+HIPKU02     0434    0437    4       N       Prekindergarten students - Hispanic - gender unknown.
+BLPKM02     0438    0441    4       N       Prekindergarten students - Black, not Hispanic - male.
+BLPKF02     0442    0445    4       N       Prekindergarten students - Black, not Hispanic - female.
+BLPKU02     0446    0449    4       N       Prekindergarten students - Black, not Hispanic - gender unknown.
+WHPKM02     0450    0453    4       N       Prekindergarten students - White, not Hispanic - male.
+WHPKF02     0454    0457    4       N       Prekindergarten students - White, not Hispanic - female.
+WHPKU02     0458    0461    4       N       Prekindergarten students - White, not Hispanic - gender unknown.
+KG02        0462    0465    4       N       Total Kindergarten students.
+AMKGM02     0466    0469    4       N       Kindergarten students - American Indian/Alaskan Native - male.
+AMKGF02     0470    0473    4       N       Kindergarten students - American Indian/Alaskan Native - female.
+AMKGU02     0474    0477    4       N       Kindergarten students - American Indian/Alaskan Native - gender unknown.
+ASKGM02     0478    0481    4       N       Kindergarten students - Asian/Pacific Islander - male.
+ASKGF02     0482    0485    4       N       Kindergarten students - Asian/Pacific Islander - female.
+ASKGU02     0486    0489    4       N       Kindergarten students - Asian/Pacific Islander - gender unknown.
+HIKGM02     0490    0493    4       N       Kindergarten students - Hispanic - male.
+HIKGF02     0494    0497    4       N       Kindergarten students - Hispanic - female.
+HIKGU02     0498    0501    4       N       Kindergarten students - Hispanic - gender unknown.
+BLKGM02     0502    0505    4       N       Kindergarten students - Black, not Hispanic - male.
+BLKGF02     0506    0509    4       N       Kindergarten students - Black, not Hispanic - female.
+BLKGU02     0510    0513    4       N       Kindergarten students - Black, not Hispanic - gender unknown.
+WHKGM02     0514    0517    4       N       Kindergarten students - White, not Hispanic - male.
+WHKGF02     0518    0521    4       N       Kindergarten students - White, not Hispanic - female.
+WHKGU02     0522    0525    4       N       Kindergarten students - White, not Hispanic - gender unknown.
+G0102       0526    0529    4       N       Total Grade 1 students.
+AM01M02     0530    0533    4       N       Grade 1 students - American Indian/Alaskan Native - male.
+AM01F02     0534    0537    4       N       Grade 1 students - American Indian/Alaskan Native - female.
+AM01U02     0538    0541    4       N       Grade 1 students - American Indian/Alaskan Native - gender unknown.
+AS01M02     0542    0545    4       N       Grade 1 students - Asian/Pacific Islander - male.
+AS01F02     0546    0549    4       N       Grade 1 students - Asian/Pacific Islander - female.
+AS01U02     0550    0553    4       N       Grade 1 students - Asian/Pacific Islander - gender unknown.
+HI01M02     0554    0557    4       N       Grade 1 students - Hispanic - male.
+HI01F02     0558    0561    4       N       Grade 1 students - Hispanic - female.
+HI01U02     0562    0565    4       N       Grade 1 students - Hispanic - gender unknown.
+BL01M02     0566    0569    4       N       Grade 1 students - Black, not Hispanic - male.
+BL01F02     0570    0573    4       N       Grade 1 students - Black, not Hispanic - female.
+BL01U02     0574    0577    4       N       Grade 1 students - Black, not Hispanic - gender unknown.
+WH01M02     0578    0581    4       N       Grade 1 students - White, not Hispanic - male.
+WH01F02     0582    0585    4       N       Grade 1 students - White, not Hispanic - female.
+WH01U02     0586    0589    4       N       Grade 1 students - White, not Hispanic - gender unknown.
+G0202       0590    0593    4       N       Total Grade 2 students.
+AM02M02     0594    0597    4       N       Grade 2 students - American Indian/Alaskan Native - male.
+AM02F02     0598    0601    4       N       Grade 2 students - American Indian/Alaskan Native - female.
+AM02U02     0602    0605    4       N       Grade 2 students - American Indian/Alaskan Native - gender unknown.
+AS02M02     0606    0609    4       N       Grade 2 students - Asian/Pacific Islander - male.
+AS02F02     0610    0613    4       N       Grade 2 students - Asian/Pacific Islander - female.
+AS02U02     0614    0617    4       N       Grade 2 students - Asian/Pacific Islander - gender unknown.
+HI02M02     0618    0621    4       N       Grade 2 students - Hispanic - male.
+HI02F02     0622    0625    4       N       Grade 2 students - Hispanic - female.
+HI02U02     0626    0629    4       N       Grade 2 students - Hispanic - gender unknown.
+BL02M02     0630    0633    4       N       Grade 2 students - Black, not Hispanic - male.
+BL02F02     0634    0637    4       N       Grade 2 students - Black, not Hispanic - female.
+BL02U02     0638    0641    4       N       Grade 2 students - Black, not Hispanic - gender unknown.
+WH02M02     0642    0645    4       N       Grade 2 students - White, not Hispanic - male.
+WH02F02     0646    0649    4       N       Grade 2 students - White, not Hispanic - female.
+WH02U02     0650    0653    4       N       Grade 2 students - White, not Hispanic - gender unknown.
+G0302       0654    0657    4       N       Total Grade 3 students.
+AM03M02     0658    0661    4       N       Grade 3 students - American Indian/Alaskan Native - male.
+AM03F02     0662    0665    4       N       Grade 3 students - American Indian/Alaskan Native - female.
+AM03U02     0666    0669    4       N       Grade 3 students - American Indian/Alaskan Native - gender unknown.
+AS03M02     0670    0673    4       N       Grade 3 students - Asian/Pacific Islander - male.
+AS03F02     0674    0677    4       N       Grade 3 students - Asian/Pacific Islander - female.
+AS03U02     0678    0681    4       N       Grade 3 students - Asian/Pacific Islander - gender unknown.
+HI03M02     0682    0685    4       N       Grade 3 students - Hispanic - male.
+HI03F02     0686    0689    4       N       Grade 3 students - Hispanic - female.
+HI03U02     0690    0693    4       N       Grade 3 students - Hispanic - gender unknown.
+BL03M02     0694    0697    4       N       Grade 3 students - Black, not Hispanic - male.
+BL03F02     0698    0701    4       N       Grade 3 students - Black, not Hispanic - female.
+BL03U02     0702    0705    4       N       Grade 3 students - Black, not Hispanic - gender unknown.
+WH03M02     0706    0709    4       N       Grade 3 students - White, not Hispanic - male.
+WH03F02     0710    0713    4       N       Grade 3 students - White, not Hispanic - female.
+WH03U02     0714    0717    4       N       Grade 3 students - White, not Hispanic - gender unknown.
+G0402       0718    0721    4       N       Total Grade 4 students.
+AM04M02     0722    0725    4       N       Grade 4 students - American Indian/Alaskan Native - male.
+AM04F02     0726    0729    4       N       Grade 4 students - American Indian/Alaskan Native - female.
+AM04U02     0730    0733    4       N       Grade 4 students - American Indian/Alaskan Native - gender unknown.
+AS04M02     0734    0737    4       N       Grade 4 students - Asian/Pacific Islander - male.
+AS04F02     0738    0741    4       N       Grade 4 students - Asian/Pacific Islander - female.
+AS04U02     0742    0745    4       N       Grade 4 students - Asian/Pacific Islander - gender unknown.
+HI04M02     0746    0749    4       N       Grade 4 students - Hispanic - male.
+HI04F02     0750    0753    4       N       Grade 4 students - Hispanic - female.
+HI04U02     0754    0757    4       N       Grade 4 students - Hispanic - gender unknown.
+BL04M02     0758    0761    4       N       Grade 4 students - Black, not Hispanic - male.
+BL04F02     0762    0765    4       N       Grade 4 students - Black, not Hispanic - female.
+BL04U02     0766    0769    4       N       Grade 4 students - Black, not Hispanic - gender unknown.
+WH04M02     0770    0773    4       N       Grade 4 students - White, not Hispanic - male.
+WH04F02     0774    0777    4       N       Grade 4 students - White, not Hispanic - female.
+WH04U02     0778    0781    4       N       Grade 4 students - White, not Hispanic - gender unknown.
+G0502       0782    0785    4       N       Total Grade 5 students.
+AM05M02     0786    0789    4       N       Grade 5 students - American Indian/Alaskan Native - male.
+AM05F02     0790    0793    4       N       Grade 5 students - American Indian/Alaskan Native - female.
+AM05U02     0794    0797    4       N       Grade 5 students - American Indian/Alaskan Native - gender unknown.
+AS05M02     0798    0801    4       N       Grade 5 students - Asian/Pacific Islander - male.
+AS05F02     0802    0805    4       N       Grade 5 students - Asian/Pacific Islander - female.
+AS05U02     0806    0809    4       N       Grade 5 students - Asian/Pacific Islander - gender unknown.
+HI05M02     0810    0813    4       N       Grade 5 students - Hispanic - male.
+HI05F02     0814    0817    4       N       Grade 5 students - Hispanic - female.
+HI05U02     0818    0821    4       N       Grade 5 students - Hispanic - gender unknown.
+BL05M02     0822    0825    4       N       Grade 5 students - Black, not Hispanic - male.
+BL05F02     0826    0829    4       N       Grade 5 students - Black, not Hispanic - female.
+BL05U02     0830    0833    4       N       Grade 5 students - Black, not Hispanic - gender unknown.
+WH05M02     0834    0837    4       N       Grade 5 students - White, not Hispanic - male.
+WH05F02     0838    0841    4       N       Grade 5 students - White, not Hispanic - female.
+WH05U02     0842    0845    4       N       Grade 5 students - White, not Hispanic - gender unknown.
+G0602       0846    0849    4       N       Total Grade 6 students.
+AM06M02     0850    0853    4       N       Grade 6 students - American Indian/Alaskan Native - male.
+AM06F02     0854    0857    4       N       Grade 6 students - American Indian/Alaskan Native - female.
+AM06U02     0858    0861    4       N       Grade 6 students - American Indian/Alaskan Native - gender unknown.
+AS06M02     0862    0865    4       N       Grade 6 students - Asian/Pacific Islander - male.
+AS06F02     0866    0869    4       N       Grade 6 students - Asian/Pacific Islander - female.
+AS06U02     0870    0873    4       N       Grade 6 students - Asian/Pacific Islander - gender unknown.
+HI06M02     0874    0877    4       N       Grade 6 students - Hispanic - male.
+HI06F02     0878    0881    4       N       Grade 6 students - Hispanic - female.
+HI06U02     0882    0885    4       N       Grade 6 students - Hispanic - gender unknown.
+BL06M02     0886    0889    4       N       Grade 6 students - Black, not Hispanic - male.
+BL06F02     0890    0893    4       N       Grade 6 students - Black, not Hispanic - female.
+BL06U02     0894    0897    4       N       Grade 6 students - Black, not Hispanic - gender unknown.
+WH06M02     0898    0901    4       N       Grade 6 students - White, not Hispanic - male.
+WH06F02     0902    0905    4       N       Grade 6 students - White, not Hispanic - female.
+WH06U02     0906    0909    4       N       Grade 6 students - White, not Hispanic - gender unknown.
+G0702       0910    0913    4       N       Total Grade 7 students.
+AM07M02     0914    0917    4       N       Grade 7 students - American Indian/Alaskan Native - male.
+AM07F02     0918    0921    4       N       Grade 7 students - American Indian/Alaskan Native - female.
+AM07U02     0922    0925    4       N       Grade 7 students - American Indian/Alaskan Native - gender unknown.
+AS07M02     0926    0929    4       N       Grade 7 students - Asian/Pacific Islander - male.
+AS07F02     0930    0933    4       N       Grade 7 students - Asian/Pacific Islander - female.
+AS07U02     0934    0937    4       N       Grade 7 students - Asian/Pacific Islander - gender unknown.
+HI07M02     0938    0941    4       N       Grade 7 students - Hispanic - male.
+HI07F02     0942    0945    4       N       Grade 7 students - Hispanic - female.
+HI07U02     0946    0949    4       N       Grade 7 students - Hispanic - gender unknown.
+BL07M02     0950    0953    4       N       Grade 7 students - Black, not Hispanic - male.
+BL07F02     0954    0957    4       N       Grade 7 students - Black, not Hispanic - female.
+BL07U02     0958    0961    4       N       Grade 7 students - Black, not Hispanic - gender unknown.
+WH07M02     0962    0965    4       N       Grade 7 students - White, not Hispanic - male.
+WH07F02     0966    0969    4       N       Grade 7 students - White, not Hispanic - female.
+WH07U02     0970    0973    4       N       Grade 7 students - White, not Hispanic - gender unknown.
+G0802       0974    0977    4       N       Total Grade 8 students.
+AM08M02     0978    0981    4       N       Grade 8 students - American Indian/Alaskan Native - male.
+AM08F02     0982    0985    4       N       Grade 8 students - American Indian/Alaskan Native - female.
+AM08U02     0986    0989    4       N       Grade 8 students - American Indian/Alaskan Native - gender unknown.
+AS08M02     0990    0993    4       N       Grade 8 students - Asian/Pacific Islander - male.
+AS08F02     0994    0997    4       N       Grade 8 students - Asian/Pacific Islander - female.
+AS08U02     0998    1001    4       N       Grade 8 students - Asian/Pacific Islander - gender unknown.
+HI08M02     1002    1005    4       N       Grade 8 students - Hispanic - male.
+HI08F02     1006    1009    4       N       Grade 8 students - Hispanic - female.
+HI08U02     1010    1013    4       N       Grade 8 students - Hispanic - gender unknown.
+BL08M02     1014    1017    4       N       Grade 8 students - Black, not Hispanic - male.
+BL08F02     1018    1021    4       N       Grade 8 students - Black, not Hispanic - female.
+BL08U02     1022    1025    4       N       Grade 8 students - Black, not Hispanic - gender unknown.
+WH08M02     1026    1029    4       N       Grade 8 students - White, not Hispanic - male.
+WH08F02     1030    1033    4       N       Grade 8 students - White, not Hispanic - female.
+WH08U02     1034    1037    4       N       Grade 8 students - White, not Hispanic - gender unknown.
+G0902       1038    1041    4       N       Total Grade 9 students.
+AM09M02     1042    1045    4       N       Grade 9 students - American Indian/Alaskan Native - male.
+AM09F02     1046    1049    4       N       Grade 9 students - American Indian/Alaskan Native - female.
+AM09U02     1050    1053    4       N       Grade 9 students - American Indian/Alaskan Native - gender unknown.
+AS09M02     1054    1057    4       N       Grade 9 students - Asian/Pacific Islander - male.
+AS09F02     1058    1061    4       N       Grade 9 students - Asian/Pacific Islander - female.
+AS09U02     1062    1065    4       N       Grade 9 students - Asian/Pacific Islander - gender unknown.
+HI09M02     1066    1069    4       N       Grade 9 students - Hispanic - male.
+HI09F02     1070    1073    4       N       Grade 9 students - Hispanic - female.
+HI09U02     1074    1077    4       N       Grade 9 students - Hispanic - gender unknown.
+BL09M02     1078    1081    4       N       Grade 9 students - Black, not Hispanic - male.
+BL09F02     1082    1085    4       N       Grade 9 students - Black, not Hispanic - female.
+BL09U02     1086    1089    4       N       Grade 9 students - Black, not Hispanic - gender unknown.
+WH09M02     1090    1093    4       N       Grade 9 students - White, not Hispanic - male.
+WH09F02     1094    1097    4       N       Grade 9 students - White, not Hispanic - female.
+WH09U02     1098    1101    4       N       Grade 9 students - White, not Hispanic - gender unknown.
+G1002       1102    1105    4       N       Total Grade 10 students.
+AM10M02     1106    1109    4       N       Grade 10 students - American Indian/Alaskan Native - male.
+AM10F02     1110    1113    4       N       Grade 10 students - American Indian/Alaskan Native - female.
+AM10U02     1114    1117    4       N       Grade 10 students - American Indian/Alaskan Native - gender unknown.
+AS10M02     1118    1121    4       N       Grade 10 students - Asian/Pacific Islander - male.
+AS10F02     1122    1125    4       N       Grade 10 students - Asian/Pacific Islander - female.
+AS10U02     1126    1129    4       N       Grade 10 students - Asian/Pacific Islander - gender unknown.
+HI10M02     1130    1133    4       N       Grade 10 students - Hispanic - male.
+HI10F02     1134    1137    4       N       Grade 10 students - Hispanic - female.
+HI10U02     1138    1141    4       N       Grade 10 students - Hispanic - gender unknown.
+BL10M02     1142    1145    4       N       Grade 10 students - Black, not Hispanic - male.
+BL10F02     1146    1149    4       N       Grade 10 students - Black, not Hispanic - female.
+BL10U02     1150    1153    4       N       Grade 10 students - Black, not Hispanic - gender unknown.
+WH10M02     1154    1157    4       N       Grade 10 students - White, not Hispanic - male.
+WH10F02     1158    1161    4       N       Grade 10 students - White, not Hispanic - female.
+WH10U02     1162    1165    4       N       Grade 10 students - White, not Hispanic - gender unknown.
+G1102       1166    1169    4       N       Total Grade 11 students.
+AM11M02     1170    1173    4       N       Grade 11 students - American Indian/Alaskan Native - male.
+AM11F02     1174    1177    4       N       Grade 11 students - American Indian/Alaskan Native - female.
+AM11U02     1178    1181    4       N       Grade 11 students - American Indian/Alaskan Native - gender unknown.
+AS11M02     1182    1185    4       N       Grade 11 students - Asian/Pacific Islander - male.
+AS11F02     1186    1189    4       N       Grade 11 students - Asian/Pacific Islander - female.
+AS11U02     1190    1193    4       N       Grade 11 students - Asian/Pacific Islander - gender unknown.
+HI11M02     1194    1197    4       N       Grade 11 students - Hispanic - male.
+HI11F02     1198    1201    4       N       Grade 11 students - Hispanic - female.
+HI11U02     1202    1205    4       N       Grade 11 students - Hispanic - gender unknown.
+BL11M02     1206    1209    4       N       Grade 11 students - Black, not Hispanic - male.
+BL11F02     1210    1213    4       N       Grade 11 students - Black, not Hispanic - female.
+BL11U02     1214    1217    4       N       Grade 11 students - Black, not Hispanic - gender unknown.
+WH11M02     1218    1221    4       N       Grade 11 students - White, not Hispanic - male.
+WH11F02     1222    1225    4       N       Grade 11 students - White, not Hispanic - female.
+WH11U02     1226    1229    4       N       Grade 11 students - White, not Hispanic - gender unknown.
+G1202       1230    1233    4       N       Total Grade 12 students.
+AM12M02     1234    1237    4       N       Grade 12 students - American Indian/Alaskan Native - male.
+AM12F02     1238    1241    4       N       Grade 12 students - American Indian/Alaskan Native - female.
+AM12U02     1242    1245    4       N       Grade 12 students - American Indian/Alaskan Native - gender unknown.
+AS12M02     1246    1249    4       N       Grade 12 students - Asian/Pacific Islander - male.
+AS12F02     1250    1253    4       N       Grade 12 students - Asian/Pacific Islander - female.
+AS12U02     1254    1257    4       N       Grade 12 students - Asian/Pacific Islander - gender unknown.
+HI12M02     1258    1261    4       N       Grade 12 students - Hispanic - male.
+HI12F02     1262    1265    4       N       Grade 12 students - Hispanic - female.
+HI12U02     1266    1269    4       N       Grade 12 students - Hispanic - gender unknown.
+BL12M02     1270    1273    4       N       Grade 12 students - Black, not Hispanic - male.
+BL12F02     1274    1277    4       N       Grade 12 students - Black, not Hispanic - female.
+BL12U02     1278    1281    4       N       Grade 12 students - Black, not Hispanic - gender unknown.
+WH12M02     1282    1285    4       N       Grade 12 students - White, not Hispanic - male.
+WH12F02     1286    1289    4       N       Grade 12 students - White, not Hispanic - female.
+WH12U02     1290    1293    4       N       Grade 12 students - White, not Hispanic - gender unknown.
+UG02        1294    1297    4       N       Total Ungraded students.
+AMUGM02     1298    1301    4       N       Ungraded students - American Indian/Alaskan Native - male.
+AMUGF02     1302    1305    4       N       Ungraded students - American Indian/Alaskan Native - female.
+AMUGU02     1306    1309    4       N       Ungraded students - American Indian/Alaskan Native - gender unknown.
+ASUGM02     1310    1313    4       N       Ungraded students - Asian/Pacific Islander - male.
+ASUGF02     1314    1317    4       N       Ungraded students - Asian/Pacific Islander - female.
+ASUGU02     1318    1321    4       N       Ungraded students - Asian/Pacific Islander - gender unknown.
+HIUGM02     1322    1325    4       N       Ungraded students - Hispanic - male.
+HIUGF02     1326    1329    4       N       Ungraded students - Hispanic - female.
+HIUGU02     1330    1333    4       N       Ungraded students - Hispanic - gender unknown.
+BLUGM02     1334    1337    4       N       Ungraded students - Black, not Hispanic - male.
+BLUGF02     1338    1341    4       N       Ungraded students - Black, not Hispanic - female.
+BLUGU02     1342    1345    4       N       Ungraded students - Black, not Hispanic - gender unknown.
+WHUGM02     1346    1349    4       N       Ungraded students - White, not Hispanic - male.
+WHUGF02     1350    1353    4       N       Ungraded students - White, not Hispanic - female.
+WHUGU02     1354    1357    4       N       Ungraded students - White, not Hispanic - gender unknown.
+MEMBER02    1358    1361    4       N       Total students, All Grades:  The reported total membership of the school.
+AM02        1362    1365    4       N       American Indian/Alaskan Native students.  If not reported, this field was calculated by
+                                            summing the AMALM02, AMALF02, AMALU02 fields.
+AMALM02     1366    1369    4       N       Total students, All Grades - American Indian/Alaskan Native - male.
+AMALF02     1370    1373    4       N       Total students, All Grades - American Indian/Alaskan Native - female.
+AMALU02     1374    1377    4       N       Total students, All Grades - American Indian/Alaskan Native - gender unknown.
+ASIAN02     1378    1381    4       N       Asian/Pacific Islander students.  If not reported, this field was calculated by summing the
+                                            ASALM02, ASALF02, ASALU02 fields.
+ASALM02     1382    1385    4       N       Total students, All Grades - Asian/Pacific Islander - male.
+ASALF02     1386    1389    4       N       Total students, All Grades - Asian/Pacific Islander - female.
+ASALU02     1390    1393    4       N       Total students, All Grades - Asian/Pacific Islander - gender unknown.
+HISP02      1394    1397    4       N       Hispanic students.  If not reported, this field was calculated by summing the HIALM02,
+                                            HIALF02, HIALU02 fields.
+HIALM02     1398    1401    4       N       Total students, All Grades - Hispanic - male.
+HIALF02     1402    1405    4       N       Total students, All Grades - Hispanic - female.
+HIALU02     1406    1409    4       N       Total students, All Grades - Hispanic - gender unknown.
+BLACK02     1410    1413    4       N       Black, not Hispanic students.  If not reported, this field was calculated by summing the
+                                            BLALM02, BLALF02, BLALU02 fields.
+BLALM02     1414    1417    4       N       Total students, All Grades - Black, not Hispanic - male.
+BLALF02     1418    1421    4       N       Total students, All Grades - Black, not Hispanic - female.
+BLALU02     1422    1425    4       N       Total students, All Grades - Black, not Hispanic - gender unknown.
+WHITE02     1426    1429    4       N       White, not Hispanic students.  If not reported, this field was calculated by summing the
+                                            WHALM02, WHALF02, WHALU02 fields.
+WHALM02     1430    1433    4       N       Total students, All Grades - White, not Hispanic - male.
+WHALF02     1434    1437    4       N       Total students, All Grades - White, not Hispanic - female.
+WHALU02     1438    1441    4       N       Total students, All Grades - White, not Hispanic - gender unknown.
+TOTETH02    1442    1445    4       N       Calculated school ethnicity membership: The sum of the fields IND02, ASIAN02, HISP02,
+                                            BLACK02, WHITE02.  Students belonging to an unknown or non-CCD race category are not
+                                            captured in this field.
+PUPTCH02    1446    1450    5*      N       Calculated Pupil Teacher Ratio: Total reported students (MEMBER02) divided by FTE classroom
+                                            teachers (FTE02).  Reported to the nearest tenth; field includes one explicit decimal.
+TOTGRD02    1451    1454    4       N       Calculated school membership: The sum of reported grade totals.  If one of the grade totals
+                                            is missing, then TOTGRD is missing.
+ILOCAL02    1455    1455    1       AN      If the field contains an "O", the old methodology was used to determine Locale Code;
+                                            If the field contains a "W", the new methodology was used to determine Locale Code.
+IFTE02      1456    1456    1       AN      If the field contains anything other than "R", the Total Classroom Teachers count
+                                            originally submitted was adjusted.
+IGSLO02     1457    1457    1       AN      If this field contains anything other than "R", the GSLO value originally 
+                                            submitted was adjusted.
+IGSHI02     1458    1458    1       AN      If this field contains anything other than "R", the GSHI value  originally 
+                                            submitted was adjusted.
+ITITLI02    1459    1459    1       AN      If the field contains anything other than "R", the Title I eligible value originally
+                                            submitted was adjusted.
+ISTITL02    1460    1460    1       AN      If the field contains anything other than "R", the School-wide Title I value originally
+                                            submitted was adjusted.
+IMAGNE02    1461    1461    1       AN      If the field contains anything other than "R", the Magnet School value originally submitted
+                                            was adjusted.
+ICHART02    1462    1462    1       AN      If the field contains anything other than "R", the Charter School value originally
+                                            submitted was adjusted.
+IFRELC02    1463    1463    1       AN      If the field contains anything other than "R", the Students Eligible for Free Lunch count
+                                            originally submitted was adjusted.
+IREDLC02    1464    1464    1       AN      If the field contains anything other than "R", the Students Eligible for Reduced-Price
+                                            Lunch count originally submitted was adjusted.
+ITOTFR02    1465    1465    1       AN      If the field contains anything other than "R", the Total of Free Lunch Eligible and
+                                            Reduced-Price Lunch Eligible count originally submitted was adjusted.
+IMIGRN02    1466    1466    1       AN      If the field contains anything other than "R", the Migrant Students Enrolled in Previous
+                                            Year count originally submitted was adjusted.
+IPK02       1467    1467    1       AN      If the field contains anything other than "R", the Total Prekindergarten students count
+                                            originally submitted was adjusted.
+IAMPKM02    1468    1468    1       AN      If the field contains anything other than "R", the Prekindergarten students - American
+                                            Indian/Alaskan Native - male count originally submitted was adjusted.
+IAMPKF02    1469    1469    1       AN      If the field contains anything other than "R", the Prekindergarten students - American
+                                            Indian/Alaskan Native - female count originally submitted was adjusted.
+IAMPKU02    1470    1470    1       AN      If the field contains anything other than "R", the Prekindergarten students - American
+                                            Indian/Alaskan Native - gender unknown count originally submitted was adjusted.
+IASPKM02    1471    1471    1       AN      If the field contains anything other than "R", the Prekindergarten students - Asian/Pacific
+                                            Islander - male count originally submitted was adjusted.
+IASPKF02    1472    1472    1       AN      If the field contains anything other than "R", the Prekindergarten students - Asian/Pacific
+                                            Islander - female count originally submitted was adjusted.
+IASPKU02    1473    1473    1       AN      If the field contains anything other than "R", the Prekindergarten students - Asian/Pacific
+                                            Islander - gender unknown count originally submitted was adjusted.
+IHIPKM02    1474    1474    1       AN      If the field contains anything other than "R", the Prekindergarten students - Hispanic -
+                                            male count originally submitted was adjusted.
+IHIPKF02    1475    1475    1       AN      If the field contains anything other than "R", the Prekindergarten students - Hispanic -
+                                            female count originally submitted was adjusted.
+IHIPKU02    1476    1476    1       AN      If the field contains anything other than "R", the Prekindergarten students - Hispanic -
+                                            gender unknown count originally submitted was adjusted.
+IBLPKM02    1477    1477    1       AN      If the field contains anything other than "R", the Prekindergarten students - Black, not
+                                            Hispanic - male count originally submitted was adjusted.
+IBLPKF02    1478    1478    1       AN      If the field contains anything other than "R", the Prekindergarten students - Black, not
+                                            Hispanic - female count originally submitted was adjusted.
+IBLPKU02    1479    1479    1       AN      If the field contains anything other than "R", the Prekindergarten students - Black, not
+                                            Hispanic - gender unknown count originally submitted was adjusted.
+IWHPKM02    1480    1480    1       AN      If the field contains anything other than "R", the Prekindergarten students - White, not
+                                            Hispanic - male count originally submitted was adjusted.
+IWHPKF02    1481    1481    1       AN      If the field contains anything other than "R", the Prekindergarten students - White, not
+                                            Hispanic - female count originally submitted was adjusted.
+IWHPKU02    1482    1482    1       AN      If the field contains anything other than "R", the Prekindergarten students - White, not
+                                            Hispanic - gender unknown count originally submitted was adjusted.
+IKG02       1483    1483    1       AN      If the field contains anything other than "R", the Total Kindergarten students count
+                                            originally submitted was adjusted.
+IAMKGM02    1484    1484    1       AN      If the field contains anything other than "R", the Kindergarten students - American
+                                            Indian/Alaskan Native - male count originally submitted was adjusted.
+IAMKGF02    1485    1485    1       AN      If the field contains anything other than "R", the Kindergarten students - American
+                                            Indian/Alaskan Native - female count originally submitted was adjusted.
+IAMKGU02    1486    1486    1       AN      If the field contains anything other than "R", the Kindergarten students - American
+                                            Indian/Alaskan Native - gender unknown count originally submitted was adjusted.
+IASKGM02    1487    1487    1       AN      If the field contains anything other than "R", the Kindergarten students - Asian/Pacific
+                                            Islander - male count originally submitted was adjusted.
+IASKGF02    1488    1488    1       AN      If the field contains anything other than "R", the Kindergarten students - Asian/Pacific
+                                            Islander - female count originally submitted was adjusted.
+IASKGU02    1489    1489    1       AN      If the field contains anything other than "R", the Kindergarten students - Asian/Pacific
+                                            Islander - gender unknown count originally submitted was adjusted.
+IHIKGM02    1490    1490    1       AN      If the field contains anything other than "R", the Kindergarten students - Hispanic - male
+                                            count originally submitted was adjusted.
+IHIKGF02    1491    1491    1       AN      If the field contains anything other than "R", the Kindergarten students - Hispanic -
+                                            female count originally submitted was adjusted.
+IHIKGU02    1492    1492    1       AN      If the field contains anything other than "R", the Kindergarten students - Hispanic -
+                                            gender unknown count originally submitted was adjusted.
+IBLKGM02    1493    1493    1       AN      If the field contains anything other than "R", the Kindergarten students - Black, not
+                                            Hispanic - male count originally submitted was adjusted.
+IBLKGF02    1494    1494    1       AN      If the field contains anything other than "R", the Kindergarten students - Black, not
+                                            Hispanic - female count originally submitted was adjusted.
+IBLKGU02    1495    1495    1       AN      If the field contains anything other than "R", the Kindergarten students - Black, not
+                                            Hispanic - gender unknown count originally submitted was adjusted.
+IWHKGM02    1496    1496    1       AN      If the field contains anything other than "R", the Kindergarten students - White, not
+                                            Hispanic - male count originally submitted was adjusted.
+IWHKGF02    1497    1497    1       AN      If the field contains anything other than "R", the Kindergarten students - White, not
+                                            Hispanic - female count originally submitted was adjusted.
+IWHKGU02    1498    1498    1       AN      If the field contains anything other than "R", the Kindergarten students - White, not
+                                            Hispanic - gender unknown count originally submitted was adjusted.
+IG0102      1499    1499    1       AN      If the field contains anything other than "R", the Total Grade 1 students count originally
+                                            submitted was adjusted.
+IAM01M02    1500    1500    1       AN      If the field contains anything other than "R", the Grade 1 students - American
+                                            Indian/Alaskan Native - male count originally submitted was adjusted.
+IAM01F02    1501    1501    1       AN      If the field contains anything other than "R", the Grade 1 students - American
+                                            Indian/Alaskan Native - female count originally submitted was adjusted.
+IAM01U02    1502    1502    1       AN      If the field contains anything other than "R", the Grade 1 students - American
+                                            Indian/Alaskan Native - gender unknown count originally submitted was adjusted.
+IAS01M02    1503    1503    1       AN      If the field contains anything other than "R", the Grade 1 students - Asian/Pacific
+                                            Islander - male count originally submitted was adjusted.
+IAS01F02    1504    1504    1       AN      If the field contains anything other than "R", the Grade 1 students - Asian/Pacific
+                                            Islander - female count originally submitted was adjusted.
+IAS01U02    1505    1505    1       AN      If the field contains anything other than "R", the Grade 1 students - Asian/Pacific
+                                            Islander - gender unknown count originally submitted was adjusted.
+IHI01M02    1506    1506    1       AN      If the field contains anything other than "R", the Grade 1 students - Hispanic - male count
+                                            originally submitted was adjusted.
+IHI01F02    1507    1507    1       AN      If the field contains anything other than "R", the Grade 1 students - Hispanic - female
+                                            count originally submitted was adjusted.
+IHI01U02    1508    1508    1       AN      If the field contains anything other than "R", the Grade 1 students - Hispanic - gender
+                                            unknown count originally submitted was adjusted.
+IBL01M02    1509    1509    1       AN      If the field contains anything other than "R", the Grade 1 students - Black, not Hispanic -
+                                            male count originally submitted was adjusted.
+IBL01F02    1510    1510    1       AN      If the field contains anything other than "R", the Grade 1 students - Black, not Hispanic -
+                                            female count originally submitted was adjusted.
+IBL01U02    1511    1511    1       AN      If the field contains anything other than "R", the Grade 1 students - Black, not Hispanic -
+                                            gender unknown count originally submitted was adjusted.
+IWH01M02    1512    1512    1       AN      If the field contains anything other than "R", the Grade 1 students - White, not Hispanic -
+                                            male count originally submitted was adjusted.
+IWH01F02    1513    1513    1       AN      If the field contains anything other than "R", the Grade 1 students - White, not Hispanic -
+                                            female count originally submitted was adjusted.
+IWH01U02    1514    1514    1       AN      If the field contains anything other than "R", the Grade 1 students - White, not Hispanic -
+                                            gender unknown count originally submitted was adjusted.
+IG0202      1515    1515    1       AN      If the field contains anything other than "R", the Total Grade 2 students count originally
+                                            submitted was adjusted.
+IAM02M02    1516    1516    1       AN      If the field contains anything other than "R", the Grade 2 students - American
+                                            Indian/Alaskan Native - male count originally submitted was adjusted.
+IAM02F02    1517    1517    1       AN      If the field contains anything other than "R", the Grade 2 students - American
+                                            Indian/Alaskan Native - female count originally submitted was adjusted.
+IAM02U02    1518    1518    1       AN      If the field contains anything other than "R", the Grade 2 students - American
+                                            Indian/Alaskan Native - gender unknown count originally submitted was adjusted.
+IAS02M02    1519    1519    1       AN      If the field contains anything other than "R", the Grade 2 students - Asian/Pacific
+                                            Islander - male count originally submitted was adjusted.
+IAS02F02    1520    1520    1       AN      If the field contains anything other than "R", the Grade 2 students - Asian/Pacific
+                                            Islander - female count originally submitted was adjusted.
+IAS02U02    1521    1521    1       AN      If the field contains anything other than "R", the Grade 2 students - Asian/Pacific
+                                            Islander - gender unknown count originally submitted was adjusted.
+IHI02M02    1522    1522    1       AN      If the field contains anything other than "R", the Grade 2 students - Hispanic - male count
+                                            originally submitted was adjusted.
+IHI02F02    1523    1523    1       AN      If the field contains anything other than "R", the Grade 2 students - Hispanic - female
+                                            count originally submitted was adjusted.
+IHI02U02    1524    1524    1       AN      If the field contains anything other than "R", the Grade 2 students - Hispanic - gender
+                                            unknown count originally submitted was adjusted.
+IBL02M02    1525    1525    1       AN      If the field contains anything other than "R", the Grade 2 students - Black, not Hispanic -
+                                            male count originally submitted was adjusted.
+IBL02F02    1526    1526    1       AN      If the field contains anything other than "R", the Grade 2 students - Black, not Hispanic -
+                                            female count originally submitted was adjusted.
+IBL02U02    1527    1527    1       AN      If the field contains anything other than "R", the Grade 2 students - Black, not Hispanic -
+                                            gender unknown count originally submitted was adjusted.
+IWH02M02    1528    1528    1       AN      If the field contains anything other than "R", the Grade 2 students - White, not Hispanic -
+                                            male count originally submitted was adjusted.
+IWH02F02    1529    1529    1       AN      If the field contains anything other than "R", the Grade 2 students - White, not Hispanic -
+                                            female count originally submitted was adjusted.
+IWH02U02    1530    1530    1       AN      If the field contains anything other than "R", the Grade 2 students - White, not Hispanic -
+                                            gender unknown count originally submitted was adjusted.
+IG0302      1531    1531    1       AN      If the field contains anything other than "R", the Total Grade 3 students count originally
+                                            submitted was adjusted.
+IAM03M02    1532    1532    1       AN      If the field contains anything other than "R", the Grade 3 students - American
+                                            Indian/Alaskan Native - male count originally submitted was adjusted.
+IAM03F02    1533    1533    1       AN      If the field contains anything other than "R", the Grade 3 students - American
+                                            Indian/Alaskan Native - female count originally submitted was adjusted.
+IAM03U02    1534    1534    1       AN      If the field contains anything other than "R", the Grade 3 students - American
+                                            Indian/Alaskan Native - gender unknown count originally submitted was adjusted.
+IAS03M02    1535    1535    1       AN      If the field contains anything other than "R", the Grade 3 students - Asian/Pacific
+                                            Islander - male count originally submitted was adjusted.
+IAS03F02    1536    1536    1       AN      If the field contains anything other than "R", the Grade 3 students - Asian/Pacific
+                                            Islander - female count originally submitted was adjusted.
+IAS03U02    1537    1537    1       AN      If the field contains anything other than "R", the Grade 3 students - Asian/Pacific
+                                            Islander - gender unknown count originally submitted was adjusted.
+IHI03M02    1538    1538    1       AN      If the field contains anything other than "R", the Grade 3 students - Hispanic - male count
+                                            originally submitted was adjusted.
+IHI03F02    1539    1539    1       AN      If the field contains anything other than "R", the Grade 3 students - Hispanic - female
+                                            count originally submitted was adjusted.
+IHI03U02    1540    1540    1       AN      If the field contains anything other than "R", the Grade 3 students - Hispanic - gender
+                                            unknown count originally submitted was adjusted.
+IBL03M02    1541    1541    1       AN      If the field contains anything other than "R", the Grade 3 students - Black, not Hispanic -
+                                            male count originally submitted was adjusted.
+IBL03F02    1542    1542    1       AN      If the field contains anything other than "R", the Grade 3 students - Black, not Hispanic -
+                                            female count originally submitted was adjusted.
+IBL03U02    1543    1543    1       AN      If the field contains anything other than "R", the Grade 3 students - Black, not Hispanic -
+                                            gender unknown count originally submitted was adjusted.
+IWH03M02    1544    1544    1       AN      If the field contains anything other than "R", the Grade 3 students - White, not Hispanic -
+                                            male count originally submitted was adjusted.
+IWH03F02    1545    1545    1       AN      If the field contains anything other than "R", the Grade 3 students - White, not Hispanic -
+                                            female count originally submitted was adjusted.
+IWH03U02    1546    1546    1       AN      If the field contains anything other than "R", the Grade 3 students - White, not Hispanic -
+                                            gender unknown count originally submitted was adjusted.
+IG0402      1547    1547    1       AN      If the field contains anything other than "R", the Total Grade 4 students count originally
+                                            submitted was adjusted.
+IAM04M02    1548    1548    1       AN      If the field contains anything other than "R", the Grade 4 students - American
+                                            Indian/Alaskan Native - male count originally submitted was adjusted.
+IAM04F02    1549    1549    1       AN      If the field contains anything other than "R", the Grade 4 students - American
+                                            Indian/Alaskan Native - female count originally submitted was adjusted.
+IAM04U02    1550    1550    1       AN      If the field contains anything other than "R", the Grade 4 students - American
+                                            Indian/Alaskan Native - gender unknown count originally submitted was adjusted.
+IAS04M02    1551    1551    1       AN      If the field contains anything other than "R", the Grade 4 students - Asian/Pacific
+                                            Islander - male count originally submitted was adjusted.
+IAS04F02    1552    1552    1       AN      If the field contains anything other than "R", the Grade 4 students - Asian/Pacific
+                                            Islander - female count originally submitted was adjusted.
+IAS04U02    1553    1553    1       AN      If the field contains anything other than "R", the Grade 4 students - Asian/Pacific
+                                            Islander - gender unknown count originally submitted was adjusted.
+IHI04M02    1554    1554    1       AN      If the field contains anything other than "R", the Grade 4 students - Hispanic - male count
+                                            originally submitted was adjusted.
+IHI04F02    1555    1555    1       AN      If the field contains anything other than "R", the Grade 4 students - Hispanic - female
+                                            count originally submitted was adjusted.
+IHI04U02    1556    1556    1       AN      If the field contains anything other than "R", the Grade 4 students - Hispanic - gender
+                                            unknown count originally submitted was adjusted.
+IBL04M02    1557    1557    1       AN      If the field contains anything other than "R", the Grade 4 students - Black, not Hispanic -
+                                            male count originally submitted was adjusted.
+IBL04F02    1558    1558    1       AN      If the field contains anything other than "R", the Grade 4 students - Black, not Hispanic -
+                                            female count originally submitted was adjusted.
+IBL04U02    1559    1559    1       AN      If the field contains anything other than "R", the Grade 4 students - Black, not Hispanic -
+                                            gender unknown count originally submitted was adjusted.
+IWH04M02    1560    1560    1       AN      If the field contains anything other than "R", the Grade 4 students - White, not Hispanic -
+                                            male count originally submitted was adjusted.
+IWH04F02    1561    1561    1       AN      If the field contains anything other than "R", the Grade 4 students - White, not Hispanic -
+                                            female count originally submitted was adjusted.
+IWH04U02    1562    1562    1       AN      If the field contains anything other than "R", the Grade 4 students - White, not Hispanic -
+                                            gender unknown count originally submitted was adjusted.
+IG0502      1563    1563    1       AN      If the field contains anything other than "R", the Total Grade 5 students count originally
+                                            submitted was adjusted.
+IAM05M02    1564    1564    1       AN      If the field contains anything other than "R", the Grade 5 students - American
+                                            Indian/Alaskan Native - male count originally submitted was adjusted.
+IAM05F02    1565    1565    1       AN      If the field contains anything other than "R", the Grade 5 students - American
+                                            Indian/Alaskan Native - female count originally submitted was adjusted.
+IAM05U02    1566    1566    1       AN      If the field contains anything other than "R", the Grade 5 students - American
+                                            Indian/Alaskan Native - gender unknown count originally submitted was adjusted.
+IAS05M02    1567    1567    1       AN      If the field contains anything other than "R", the Grade 5 students - Asian/Pacific
+                                            Islander - male count originally submitted was adjusted.
+IAS05F02    1568    1568    1       AN      If the field contains anything other than "R", the Grade 5 students - Asian/Pacific
+                                            Islander - female count originally submitted was adjusted.
+IAS05U02    1569    1569    1       AN      If the field contains anything other than "R", the Grade 5 students - Asian/Pacific
+                                            Islander - gender unknown count originally submitted was adjusted.
+IHI05M02    1570    1570    1       AN      If the field contains anything other than "R", the Grade 5 students - Hispanic - male count
+                                            originally submitted was adjusted.
+IHI05F02    1571    1571    1       AN      If the field contains anything other than "R", the Grade 5 students - Hispanic - female
+                                            count originally submitted was adjusted.
+IHI05U02    1572    1572    1       AN      If the field contains anything other than "R", the Grade 5 students - Hispanic - gender
+                                            unknown count originally submitted was adjusted.
+IBL05M02    1573    1573    1       AN      If the field contains anything other than "R", the Grade 5 students - Black, not Hispanic -
+                                            male count originally submitted was adjusted.
+IBL05F02    1574    1574    1       AN      If the field contains anything other than "R", the Grade 5 students - Black, not Hispanic -
+                                            female count originally submitted was adjusted.
+IBL05U02    1575    1575    1       AN      If the field contains anything other than "R", the Grade 5 students - Black, not Hispanic -
+                                            gender unknown count originally submitted was adjusted.
+IWH05M02    1576    1576    1       AN      If the field contains anything other than "R", the Grade 5 students - White, not Hispanic -
+                                            male count originally submitted was adjusted.
+IWH05F02    1577    1577    1       AN      If the field contains anything other than "R", the Grade 5 students - White, not Hispanic -
+                                            female count originally submitted was adjusted.
+IWH05U02    1578    1578    1       AN      If the field contains anything other than "R", the Grade 5 students - White, not Hispanic -
+                                            gender unknown count originally submitted was adjusted.
+IG0602      1579    1579    1       AN      If the field contains anything other than "R", the Total Grade 6 students count originally
+                                            submitted was adjusted.
+IAM06M02    1580    1580    1       AN      If the field contains anything other than "R", the Grade 6 students - American
+                                            Indian/Alaskan Native - male count originally submitted was adjusted.
+IAM06F02    1581    1581    1       AN      If the field contains anything other than "R", the Grade 6 students - American
+                                            Indian/Alaskan Native - female count originally submitted was adjusted.
+IAM06U02    1582    1582    1       AN      If the field contains anything other than "R", the Grade 6 students - American
+                                            Indian/Alaskan Native - gender unknown count originally submitted was adjusted.
+IAS06M02    1583    1583    1       AN      If the field contains anything other than "R", the Grade 6 students - Asian/Pacific
+                                            Islander - male count originally submitted was adjusted.
+IAS06F02    1584    1584    1       AN      If the field contains anything other than "R", the Grade 6 students - Asian/Pacific
+                                            Islander - female count originally submitted was adjusted.
+IAS06U02    1585    1585    1       AN      If the field contains anything other than "R", the Grade 6 students - Asian/Pacific
+                                            Islander - gender unknown count originally submitted was adjusted.
+IHI06M02    1586    1586    1       AN      If the field contains anything other than "R", the Grade 6 students - Hispanic - male count
+                                            originally submitted was adjusted.
+IHI06F02    1587    1587    1       AN      If the field contains anything other than "R", the Grade 6 students - Hispanic - female
+                                            count originally submitted was adjusted.
+IHI06U02    1588    1588    1       AN      If the field contains anything other than "R", the Grade 6 students - Hispanic - gender
+                                            unknown count originally submitted was adjusted.
+IBL06M02    1589    1589    1       AN      If the field contains anything other than "R", the Grade 6 students - Black, not Hispanic -
+                                            male count originally submitted was adjusted.
+IBL06F02    1590    1590    1       AN      If the field contains anything other than "R", the Grade 6 students - Black, not Hispanic -
+                                            female count originally submitted was adjusted.
+IBL06U02    1591    1591    1       AN      If the field contains anything other than "R", the Grade 6 students - Black, not Hispanic -
+                                            gender unknown count originally submitted was adjusted.
+IWH06M02    1592    1592    1       AN      If the field contains anything other than "R", the Grade 6 students - White, not Hispanic -
+                                            male count originally submitted was adjusted.
+IWH06F02    1593    1593    1       AN      If the field contains anything other than "R", the Grade 6 students - White, not Hispanic -
+                                            female count originally submitted was adjusted.
+IWH06U02    1594    1594    1       AN      If the field contains anything other than "R", the Grade 6 students - White, not Hispanic -
+                                            gender unknown count originally submitted was adjusted.
+IG0702      1595    1595    1       AN      If the field contains anything other than "R", the Total Grade 7 students count originally
+                                            submitted was adjusted.
+IAM07M02    1596    1596    1       AN      If the field contains anything other than "R", the Grade 7 students - American
+                                            Indian/Alaskan Native - male count originally submitted was adjusted.
+IAM07F02    1597    1597    1       AN      If the field contains anything other than "R", the Grade 7 students - American
+                                            Indian/Alaskan Native - female count originally submitted was adjusted.
+IAM07U02    1598    1598    1       AN      If the field contains anything other than "R", the Grade 7 students - American
+                                            Indian/Alaskan Native - gender unknown count originally submitted was adjusted.
+IAS07M02    1599    1599    1       AN      If the field contains anything other than "R", the Grade 7 students - Asian/Pacific
+                                            Islander - male count originally submitted was adjusted.
+IAS07F02    1600    1600    1       AN      If the field contains anything other than "R", the Grade 7 students - Asian/Pacific
+                                            Islander - female count originally submitted was adjusted.
+IAS07U02    1601    1601    1       AN      If the field contains anything other than "R", the Grade 7 students - Asian/Pacific
+                                            Islander - gender unknown count originally submitted was adjusted.
+IHI07M02    1602    1602    1       AN      If the field contains anything other than "R", the Grade 7 students - Hispanic - male count
+                                            originally submitted was adjusted.
+IHI07F02    1603    1603    1       AN      If the field contains anything other than "R", the Grade 7 students - Hispanic - female
+                                            count originally submitted was adjusted.
+IHI07U02    1604    1604    1       AN      If the field contains anything other than "R", the Grade 7 students - Hispanic - gender
+                                            unknown count originally submitted was adjusted.
+IBL07M02    1605    1605    1       AN      If the field contains anything other than "R", the Grade 7 students - Black, not Hispanic -
+                                            male count originally submitted was adjusted.
+IBL07F02    1606    1606    1       AN      If the field contains anything other than "R", the Grade 7 students - Black, not Hispanic -
+                                            female count originally submitted was adjusted.
+IBL07U02    1607    1607    1       AN      If the field contains anything other than "R", the Grade 7 students - Black, not Hispanic -
+                                            gender unknown count originally submitted was adjusted.
+IWH07M02    1608    1608    1       AN      If the field contains anything other than "R", the Grade 7 students - White, not Hispanic -
+                                            male count originally submitted was adjusted.
+IWH07F02    1609    1609    1       AN      If the field contains anything other than "R", the Grade 7 students - White, not Hispanic -
+                                            female count originally submitted was adjusted.
+IWH07U02    1610    1610    1       AN      If the field contains anything other than "R", the Grade 7 students - White, not Hispanic -
+                                            gender unknown count originally submitted was adjusted.
+IG0802      1611    1611    1       AN      If the field contains anything other than "R", the Total Grade 8 students count originally
+                                            submitted was adjusted.
+IAM08M02    1612    1612    1       AN      If the field contains anything other than "R", the Grade 8 students - American
+                                            Indian/Alaskan Native - male count originally submitted was adjusted.
+IAM08F02    1613    1613    1       AN      If the field contains anything other than "R", the Grade 8 students - American
+                                            Indian/Alaskan Native - female count originally submitted was adjusted.
+IAM08U02    1614    1614    1       AN      If the field contains anything other than "R", the Grade 8 students - American
+                                            Indian/Alaskan Native - gender unknown count originally submitted was adjusted.
+IAS08M02    1615    1615    1       AN      If the field contains anything other than "R", the Grade 8 students - Asian/Pacific
+                                            Islander - male count originally submitted was adjusted.
+IAS08F02    1616    1616    1       AN      If the field contains anything other than "R", the Grade 8 students - Asian/Pacific
+                                            Islander - female count originally submitted was adjusted.
+IAS08U02    1617    1617    1       AN      If the field contains anything other than "R", the Grade 8 students - Asian/Pacific
+                                            Islander - gender unknown count originally submitted was adjusted.
+IHI08M02    1618    1618    1       AN      If the field contains anything other than "R", the Grade 8 students - Hispanic - male count
+                                            originally submitted was adjusted.
+IHI08F02    1619    1619    1       AN      If the field contains anything other than "R", the Grade 8 students - Hispanic - female
+                                            count originally submitted was adjusted.
+IHI08U02    1620    1620    1       AN      If the field contains anything other than "R", the Grade 8 students - Hispanic - gender
+                                            unknown count originally submitted was adjusted.
+IBL08M02    1621    1621    1       AN      If the field contains anything other than "R", the Grade 8 students - Black, not Hispanic -
+                                            male count originally submitted was adjusted.
+IBL08F02    1622    1622    1       AN      If the field contains anything other than "R", the Grade 8 students - Black, not Hispanic -
+                                            female count originally submitted was adjusted.
+IBL08U02    1623    1623    1       AN      If the field contains anything other than "R", the Grade 8 students - Black, not Hispanic -
+                                            gender unknown count originally submitted was adjusted.
+IWH08M02    1624    1624    1       AN      If the field contains anything other than "R", the Grade 8 students - White, not Hispanic -
+                                            male count originally submitted was adjusted.
+IWH08F02    1625    1625    1       AN      If the field contains anything other than "R", the Grade 8 students - White, not Hispanic -
+                                            female count originally submitted was adjusted.
+IWH08U02    1626    1626    1       AN      If the field contains anything other than "R", the Grade 8 students - White, not Hispanic -
+                                            gender unknown count originally submitted was adjusted.
+IG0902      1627    1627    1       AN      If the field contains anything other than "R", the Total Grade 9 students count originally
+                                            submitted was adjusted.
+IAM09M02    1628    1628    1       AN      If the field contains anything other than "R", the Grade 9 students - American
+                                            Indian/Alaskan Native - male count originally submitted was adjusted.
+IAM09F02    1629    1629    1       AN      If the field contains anything other than "R", the Grade 9 students - American
+                                            Indian/Alaskan Native - female count originally submitted was adjusted.
+IAM09U02    1630    1630    1       AN      If the field contains anything other than "R", the Grade 9 students - American
+                                            Indian/Alaskan Native - gender unknown count originally submitted was adjusted.
+IAS09M02    1631    1631    1       AN      If the field contains anything other than "R", the Grade 9 students - Asian/Pacific
+                                            Islander - male count originally submitted was adjusted.
+IAS09F02    1632    1632    1       AN      If the field contains anything other than "R", the Grade 9 students - Asian/Pacific
+                                            Islander - female count originally submitted was adjusted.
+IAS09U02    1633    1633    1       AN      If the field contains anything other than "R", the Grade 9 students - Asian/Pacific
+                                            Islander - gender unknown count originally submitted was adjusted.
+IHI09M02    1634    1634    1       AN      If the field contains anything other than "R", the Grade 9 students - Hispanic - male count
+                                            originally submitted was adjusted.
+IHI09F02    1635    1635    1       AN      If the field contains anything other than "R", the Grade 9 students - Hispanic - female
+                                            count originally submitted was adjusted.
+IHI09U02    1636    1636    1       AN      If the field contains anything other than "R", the Grade 9 students - Hispanic - gender
+                                            unknown count originally submitted was adjusted.
+IBL09M02    1637    1637    1       AN      If the field contains anything other than "R", the Grade 9 students - Black, not Hispanic -
+                                            male count originally submitted was adjusted.
+IBL09F02    1638    1638    1       AN      If the field contains anything other than "R", the Grade 9 students - Black, not Hispanic -
+                                            female count originally submitted was adjusted.
+IBL09U02    1639    1639    1       AN      If the field contains anything other than "R", the Grade 9 students - Black, not Hispanic -
+                                            gender unknown count originally submitted was adjusted.
+IWH09M02    1640    1640    1       AN      If the field contains anything other than "R", the Grade 9 students - White, not Hispanic -
+                                            male count originally submitted was adjusted.
+IWH09F02    1641    1641    1       AN      If the field contains anything other than "R", the Grade 9 students - White, not Hispanic -
+                                            female count originally submitted was adjusted.
+IWH09U02    1642    1642    1       AN      If the field contains anything other than "R", the Grade 9 students - White, not Hispanic -
+                                            gender unknown count originally submitted was adjusted.
+IG1002      1643    1643    1       AN      If the field contains anything other than "R", the Total Grade 10 students count originally
+                                            submitted was adjusted.
+IAM10M02    1644    1644    1       AN      If the field contains anything other than "R", the Grade 10 students - American
+                                            Indian/Alaskan Native - male count originally submitted was adjusted.
+IAM10F02    1645    1645    1       AN      If the field contains anything other than "R", the Grade 10 students - American
+                                            Indian/Alaskan Native - female count originally submitted was adjusted.
+IAM10U02    1646    1646    1       AN      If the field contains anything other than "R", the Grade 10 students - American
+                                            Indian/Alaskan Native - gender unknown count originally submitted was adjusted.
+IAS10M02    1647    1647    1       AN      If the field contains anything other than "R", the Grade 10 students - Asian/Pacific
+                                            Islander - male count originally submitted was adjusted.
+IAS10F02    1648    1648    1       AN      If the field contains anything other than "R", the Grade 10 students - Asian/Pacific
+                                            Islander - female count originally submitted was adjusted.
+IAS10U02    1649    1649    1       AN      If the field contains anything other than "R", the Grade 10 students - Asian/Pacific
+                                            Islander - gender unknown count originally submitted was adjusted.
+IHI10M02    1650    1650    1       AN      If the field contains anything other than "R", the Grade 10 students - Hispanic - male
+                                            count originally submitted was adjusted.
+IHI10F02    1651    1651    1       AN      If the field contains anything other than "R", the Grade 10 students - Hispanic - female
+                                            count originally submitted was adjusted.
+IHI10U02    1652    1652    1       AN      If the field contains anything other than "R", the Grade 10 students - Hispanic - gender
+                                            unknown count originally submitted was adjusted.
+IBL10M02    1653    1653    1       AN      If the field contains anything other than "R", the Grade 10 students - Black, not Hispanic
+                                            - male count originally submitted was adjusted.
+IBL10F02    1654    1654    1       AN      If the field contains anything other than "R", the Grade 10 students - Black, not Hispanic
+                                            - female count originally submitted was adjusted.
+IBL10U02    1655    1655    1       AN      If the field contains anything other than "R", the Grade 10 students - Black, not Hispanic
+                                            - gender unknown count originally submitted was adjusted.
+IWH10M02    1656    1656    1       AN      If the field contains anything other than "R", the Grade 10 students - White, not Hispanic
+                                            - male count originally submitted was adjusted.
+IWH10F02    1657    1657    1       AN      If the field contains anything other than "R", the Grade 10 students - White, not Hispanic
+                                            - female count originally submitted was adjusted.
+IWH10U02    1658    1658    1       AN      If the field contains anything other than "R", the Grade 10 students - White, not Hispanic
+                                            - gender unknown count originally submitted was adjusted.
+IG1102      1659    1659    1       AN      If the field contains anything other than "R", the Total Grade 11 students count originally
+                                            submitted was adjusted.
+IAM11M02    1660    1660    1       AN      If the field contains anything other than "R", the Grade 11 students - American
+                                            Indian/Alaskan Native - male count originally submitted was adjusted.
+IAM11F02    1661    1661    1       AN      If the field contains anything other than "R", the Grade 11 students - American
+                                            Indian/Alaskan Native - female count originally submitted was adjusted.
+IAM11U02    1662    1662    1       AN      If the field contains anything other than "R", the Grade 11 students - American
+                                            Indian/Alaskan Native - gender unknown count originally submitted was adjusted.
+IAS11M02    1663    1663    1       AN      If the field contains anything other than "R", the Grade 11 students - Asian/Pacific
+                                            Islander - male count originally submitted was adjusted.
+IAS11F02    1664    1664    1       AN      If the field contains anything other than "R", the Grade 11 students - Asian/Pacific
+                                            Islander - female count originally submitted was adjusted.
+IAS11U02    1665    1665    1       AN      If the field contains anything other than "R", the Grade 11 students - Asian/Pacific
+                                            Islander - gender unknown count originally submitted was adjusted.
+IHI11M02    1666    1666    1       AN      If the field contains anything other than "R", the Grade 11 students - Hispanic - male
+                                            count originally submitted was adjusted.
+IHI11F02    1667    1667    1       AN      If the field contains anything other than "R", the Grade 11 students - Hispanic - female
+                                            count originally submitted was adjusted.
+IHI11U02    1668    1668    1       AN      If the field contains anything other than "R", the Grade 11 students - Hispanic - gender
+                                            unknown count originally submitted was adjusted.
+IBL11M02    1669    1669    1       AN      If the field contains anything other than "R", the Grade 11 students - Black, not Hispanic
+                                            - male count originally submitted was adjusted.
+IBL11F02    1670    1670    1       AN      If the field contains anything other than "R", the Grade 11 students - Black, not Hispanic
+                                            - female count originally submitted was adjusted.
+IBL11U02    1671    1671    1       AN      If the field contains anything other than "R", the Grade 11 students - Black, not Hispanic
+                                            - gender unknown count originally submitted was adjusted.
+IWH11M02    1672    1672    1       AN      If the field contains anything other than "R", the Grade 11 students - White, not Hispanic
+                                            - male count originally submitted was adjusted.
+IWH11F02    1673    1673    1       AN      If the field contains anything other than "R", the Grade 11 students - White, not Hispanic
+                                            - female count originally submitted was adjusted.
+IWH11U02    1674    1674    1       AN      If the field contains anything other than "R", the Grade 11 students - White, not Hispanic
+                                            - gender unknown count originally submitted was adjusted.
+IG1202      1675    1675    1       AN      If the field contains anything other than "R", the Total Grade 12 students count originally
+                                            submitted was adjusted.
+IAM12M02    1676    1676    1       AN      If the field contains anything other than "R", the Grade 12 students - American
+                                            Indian/Alaskan Native - male count originally submitted was adjusted.
+IAM12F02    1677    1677    1       AN      If the field contains anything other than "R", the Grade 12 students - American
+                                            Indian/Alaskan Native - female count originally submitted was adjusted.
+IAM12U02    1678    1678    1       AN      If the field contains anything other than "R", the Grade 12 students - American
+                                            Indian/Alaskan Native - gender unknown count originally submitted was adjusted.
+IAS12M02    1679    1679    1       AN      If the field contains anything other than "R", the Grade 12 students - Asian/Pacific
+                                            Islander - male count originally submitted was adjusted.
+IAS12F02    1680    1680    1       AN      If the field contains anything other than "R", the Grade 12 students - Asian/Pacific
+                                            Islander - female count originally submitted was adjusted.
+IAS12U02    1681    1681    1       AN      If the field contains anything other than "R", the Grade 12 students - Asian/Pacific
+                                            Islander - gender unknown count originally submitted was adjusted.
+IHI12M02    1682    1682    1       AN      If the field contains anything other than "R", the Grade 12 students - Hispanic - male
+                                            count originally submitted was adjusted.
+IHI12F02    1683    1683    1       AN      If the field contains anything other than "R", the Grade 12 students - Hispanic - female
+                                            count originally submitted was adjusted.
+IHI12U02    1684    1684    1       AN      If the field contains anything other than "R", the Grade 12 students - Hispanic - gender
+                                            unknown count originally submitted was adjusted.
+IBL12M02    1685    1685    1       AN      If the field contains anything other than "R", the Grade 12 students - Black, not Hispanic
+                                            - male count originally submitted was adjusted.
+IBL12F02    1686    1686    1       AN      If the field contains anything other than "R", the Grade 12 students - Black, not Hispanic
+                                            - female count originally submitted was adjusted.
+IBL12U02    1687    1687    1       AN      If the field contains anything other than "R", the Grade 12 students - Black, not Hispanic
+                                            - gender unknown count originally submitted was adjusted.
+IWH12M02    1688    1688    1       AN      If the field contains anything other than "R", the Grade 12 students - White, not Hispanic
+                                            - male count originally submitted was adjusted.
+IWH12F02    1689    1689    1       AN      If the field contains anything other than "R", the Grade 12 students - White, not Hispanic
+                                            - female count originally submitted was adjusted.
+IWH12U02    1690    1690    1       AN      If the field contains anything other than "R", the Grade 12 students - White, not Hispanic
+                                            - gender unknown count originally submitted was adjusted.
+IUG02       1691    1691    1       AN      If the field contains anything other than "R", the Total Ungraded students count originally
+                                            submitted was adjusted.
+IAMUGM02    1692    1692    1       AN      If the field contains anything other than "R", the Ungraded students - American
+                                            Indian/Alaskan Native - male count originally submitted was adjusted.
+IAMUGF02    1693    1693    1       AN      If the field contains anything other than "R", the Ungraded students - American
+                                            Indian/Alaskan Native - female count originally submitted was adjusted.
+IAMUGU02    1694    1694    1       AN      If the field contains anything other than "R", the Ungraded students - American
+                                            Indian/Alaskan Native - gender unknown count originally submitted was adjusted.
+IASUGM02    1695    1695    1       AN      If the field contains anything other than "R", the Ungraded students - Asian/Pacific
+                                            Islander - male count originally submitted was adjusted.
+IASUGF02    1696    1696    1       AN      If the field contains anything other than "R", the Ungraded students - Asian/Pacific
+                                            Islander - female count originally submitted was adjusted.
+IASUGU02    1697    1697    1       AN      If the field contains anything other than "R", the Ungraded students - Asian/Pacific
+                                            Islander - gender unknown count originally submitted was adjusted.
+IHIUGM02    1698    1698    1       AN      If the field contains anything other than "R", the Ungraded students - Hispanic - male
+                                            count originally submitted was adjusted.
+IHIUGF02    1699    1699    1       AN      If the field contains anything other than "R", the Ungraded students - Hispanic - female
+                                            count originally submitted was adjusted.
+IHIUGU02    1700    1700    1       AN      If the field contains anything other than "R", the Ungraded students - Hispanic - gender
+                                            unknown count originally submitted was adjusted.
+IBLUGM02    1701    1701    1       AN      If the field contains anything other than "R", the Ungraded students - Black, not Hispanic
+                                            - male count originally submitted was adjusted.
+IBLUGF02    1702    1702    1       AN      If the field contains anything other than "R", the Ungraded students - Black, not Hispanic
+                                            - female count originally submitted was adjusted.
+IBLUGU02    1703    1703    1       AN      If the field contains anything other than "R", the Ungraded students - Black, not Hispanic
+                                            - gender unknown count originally submitted was adjusted.
+IWHUGM02    1704    1704    1       AN      If the field contains anything other than "R", the Ungraded students - White, not Hispanic
+                                            - male count originally submitted was adjusted.
+IWHUGF02    1705    1705    1       AN      If the field contains anything other than "R", the Ungraded students - White, not Hispanic
+                                            - female count originally submitted was adjusted.
+IWHUGU02    1706    1706    1       AN      If the field contains anything other than "R", the Ungraded students - White, not Hispanic
+                                            - gender unknown count originally submitted was adjusted.
+IMEMB02     1707    1707    1       AN      If the field contains anything other than "R", the Total students, All Grades count
+                                            originally submitted was adjusted.
+IAM02       1708    1708    1       AN      If the field contains anything other than "R", one or more of the American Indian/Alaskan
+                                            Native student counts originally submitted was adjusted.
+IAMALM02    1709    1709    1       AN      If the field contains anything other than "R", the Total students, All Grades - American
+                                            Indian/Alaskan Native - male count originally submitted was adjusted.
+IAMALF02    1710    1710    1       AN      If the field contains anything other than "R", the Total students, All Grades - American
+                                            Indian/Alaskan Native - female count originally submitted was adjusted.
+IAMALU02    1711    1711    1       AN      If the field contains anything other than "R", the Total students, All Grades - American
+                                            Indian/Alaskan Native - gender unknown count originally submitted was adjusted.
+IASIAN02    1712    1712    1       AN      If the field contains anything other than "R", one or more of the Asian/Pacific Islander
+                                            student counts originally submitted was adjusted.
+IASALM02    1713    1713    1       AN      If the field contains anything other than "R", the Total students, All Grades -
+                                            Asian/Pacific Islander - male count originally submitted was adjusted.
+IASALF02    1714    1714    1       AN      If the field contains anything other than "R", the Total students, All Grades -
+                                            Asian/Pacific Islander - female count originally submitted was adjusted.
+IASALU02    1715    1715    1       AN      If the field contains anything other than "R", the Total students, All Grades -
+                                            Asian/Pacific Islander - gender unknown count originally submitted was adjusted.
+IHISP02     1716    1716    1       AN      If the field contains anything other than "R", one or more of the Hispanic student counts
+                                            originally submitted was adjusted.
+IHIALM02    1717    1717    1       AN      If the field contains anything other than "R", the Total students, All Grades - Hispanic -
+                                            male count originally submitted was adjusted.
+IHIALF02    1718    1718    1       AN      If the field contains anything other than "R", the Total students, All Grades - Hispanic -
+                                            female count originally submitted was adjusted.
+IHIALU02    1719    1719    1       AN      If the field contains anything other than "R", the Total students, All Grades - Hispanic -
+                                            gender unknown count originally submitted was adjusted.
+IBLACK02    1720    1720    1       AN      If the field contains anything other than "R", one or more of the Black, not Hispanic
+                                            student counts originally submitted was adjusted.
+IBLALM02    1721    1721    1       AN      If the field contains anything other than "R", the Total students, All Grades - Black, not
+                                            Hispanic - male count originally submitted was adjusted.
+IBLALF02    1722    1722    1       AN      If the field contains anything other than "R", the Total students, All Grades - Black, not
+                                            Hispanic - female count originally submitted was adjusted.
+IBLALU02    1723    1723    1       AN      If the field contains anything other than "R", the Total students, All Grades - Black, not
+                                            Hispanic - gender unknown count originally submitted was adjusted.
+IWHITE02    1724    1724    1       AN      If the field contains anything other than "R", one or more of the White, not Hispanic
+                                            student counts originally submitted was adjusted.
+IWHALM02    1725    1725    1       AN      If the field contains anything other than "R", the Total students, All Grades - White, not
+                                            Hispanic - male count originally submitted was adjusted.
+IWHALF02    1726    1726    1       AN      If the field contains anything other than "R", the Total students, All Grades - White, not
+                                            Hispanic - female count originally submitted was adjusted.
+IWHALU02    1727    1727    1       AN      If the field contains anything other than "R", the Total students, All Grades - White, not
+                                            Hispanic - gender unknown count originally submitted was adjusted.
+IETH02      1728    1728    1       AN      If the field contains anything other than "T", one or more of the race/ethnicity student
+                                            counts originally submitted was adjusted.
+IPUTCH02    1729    1729    1       AN      If the field contains anything other than "T", one or more of the Pupil/Teacher counts
+                                            originally submitted was adjusted.
+ITOTGR02    1730    1730    1       AN      If the field contains anything other than "T", one or more of the grade totals originally
+                                            submitted was adjusted.

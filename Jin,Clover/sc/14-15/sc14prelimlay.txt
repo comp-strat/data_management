@@ -1,0 +1,174 @@
+Common Core of Data, Public Elementary/Secondary School Directory File, 2014-15
+
+FILE NAME = sc14prelim.txt, 2014-15
+
+NVAR = 26
+
+NOBS = 102,716
+
+(*) Fields have one explicit decimal place, unless otherwise noted.
+
+(^) Fields have six explicit decimal places
+
+(+) Fields represent subfields of the fields immediately preceding them.
+
+
+The file contains data for the school year 2014–15 sorted by the NCES assigned school identification code (NCESSCH). Data
+presented in this release are available in two formats—SAS datasets (.sas7bdat) and tab-separated values text files (.txt).
+
+In the column "Data Type" below, “AN” and “N” indicate alphanumeric and numeric data, respectively.
+
+Note that starting with the 2002–03 CCD, all numeric fields contain a -1 to indicate missing and a -2 to indicate not applicable.
+Previously, numeric fields contained an “M” to indicate missing and an “N” to indicate not applicable.  Character fields continue
+to use “M” for missing and “N” for not applicable. “AN” and “N” are alphanumeric and numeric data, respectively.  Starting with 
+the 2009-10 2a file, the numeric fields were tested against NCES data quality standards; a -9 value indicates that the data item 
+did not meet those standards.
+
+===================================================================================================================================
+
+Variable               	Data   
+Name          	Order  	Type   	Description        
+
+=================================================================================================================================== 
+SURVYEAR	1     	AN  	Year corresponding to survey record.
+
+NCESSCH		2	AN	Unique NCES public school ID (7-digit NCES agency ID (LEAID) + 5-digit NCES school ID (SCHNO).  
+
+FIPST	  	3+	AN	American National Standards Institute (ANSI) state code.
+
+LEAID	  	4+	AN	NCES local education agency (LEA) ID.  
+
+				NOTE: The state to which the LEA belongs is identified by the first two digits (FIPS code) of the 
+				  LEAID. 
+
+SCHNO	 	5+	AN	NCES school ID. 
+
+				NOTE:  SCHNO is a unique number within an LEA.
+				By combining LEAID with SCHNO, each school can be uniquely identified within the total file 
+				  (see NCESSCH above).
+
+STID		6	AN	State's own ID for the education agency.
+
+SEASCH		7	AN	State's own ID for the school.
+
+LEANM		8	AN	Name of the education agency that operates this school.
+
+SCHNAM		9	AN	Name of the school.
+
+PHONE		10	AN	Telephone number of school.
+
+MSTREE		11	AN	The mailing address of the school— may be a street address, a P.O. Box number, or, if verified that 
+				  there is no address beyond CITY, STATE, and ZIP, the character “N.” 
+
+MCITY		12	AN	School mailing address city.
+
+MSTATE		13	AN	Two-letter U.S. Postal Service abbreviation of the state where the mailing address is located 
+				  (see FIPS state codes and abbreviations used in CCD dataset).
+
+MZIP		14	AN	Five-digit U.S. Postal Service ZIP code for the mailing address.
+
+MZIP4		15	AN	Four-digit (ZIP+4) code for the mailing address. If the mailing address has been assigned the 
+				  additional four-digit +4 ZIP, this field contains that number; otherwise, this field is blank.
+
+LSTREE		16	AN	School location street address.
+
+LCITY		17	AN	School location city.
+
+LSTATE		18	AN	Two-letter U.S. Postal Service abbreviation of the state where the school address is located 
+				  (see FIPS state codes and abbreviations used in CCD dataset).
+
+LZIP		19	AN	Five-digit U.S. Postal Service ZIP code for the location address.
+
+LZIP4		20	AN	Four-digit (ZIP+4) code for the location address. If the mailing address has been assigned the 
+				  additionalfour-digit +4 ZIP, this field contains that number; otherwise, this field is blank.
+  
+TYPE		21	AN	NCES code for type of school:
+
+				1 = Regular school
+
+				2 = Special education school
+
+				3 = Vocational school
+
+				4 = Alternative / Other school
+
+				5 = Reportable program
+
+STATUS		22	AN	NCES code for the school status:
+
+				1 = School was operational at the time of the last report and is currently operational.
+
+				2 = School has closed since the time of the last report.
+
+				3 = School has been opened since the time of the last report.
+
+				4 = School was in existence, but not reported in a previous year’s CCD school universe survey, and is now 
+				      being added.
+	
+				5 = School was listed in previous year’s CCD school universe as being affiliated with a different 
+				      education agency.
+
+				6 = School is temporarily closed and may reopen within 3 years.
+
+				7 = School is scheduled to be operational within 2 years.
+
+				8 = School was closed on a previous year’s file but has reopened.
+
+UNION		23	AN	Supervisory Union Identification Number for the school’s agency: 
+				For supervisory union administrative centers and component agencies, this is a number assigned by 
+				  the state to the union. Additionally, if the agency is a county superintendent, this is the ANSI 
+				  county number. If no number was reported, the field will contain "000". 
+
+
+
+CHARTR		24	AN	Charter status.  A school that provides free elementary and/or secondary education to eligible 
+				  students under a specific charter granted by the state legislature or other appropriate 
+  				  authority.
+
+				1 = Yes
+
+				2 = No
+GSLO		25	AN	School low grade offered. The following codes are used:
+
+				UG = Ungraded
+
+				PK = Prekindergarten
+
+				KG = Kindergarten
+
+				01–12 = 1st through 12th grade
+
+				N = School had no students reported
+
+ 				UG and N each occur only in isolation from other codes.  When one of these does occur, it is both 
+				  the lowest (GSLO) and the highest (GSHI) grade.
+
+GSHI		26	AN	School high grade offered. The following codes are used:
+
+				UG = Ungraded
+
+				PK = Prekindergarten
+
+				KG = Kindergarten
+
+				01–12 = 1st through 12th grade
+
+				N = School had no students reported
+
+ 				UG and N each occur only in isolation from other codes.  When one of these does occur, it is both 
+				  the lowest (GSLO) and the highest (GSHI) grade.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
