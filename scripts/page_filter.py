@@ -123,7 +123,7 @@ df_charter['FILTERED_TEXT'] = pd.Series(filtered_pages)
 # df_charter['FILTERED_TEXT'] = df_charter['WEBTEXT'].apply(filter_pages) # create column containing filtered pages
 
 ckpt_file_path = 'charters_full_2015_checkpoint1.pkl'
-df_result.to_pickle(ckpt_file_path) # checkpoint file contains new column 'FILTERED_TEXT'
+df_charter.to_pickle(ckpt_file_path) # checkpoint file contains new column 'FILTERED_TEXT'
 print('Completed text filtering. Saved checkpoint to charters_full_2015_checkpoint1.pkl')
 
 df_charter['REPLACED'] = df_charter.astype(str)['FILTERED_TEXT'] == '[]' # need at least 1 page per school else take cmo page
