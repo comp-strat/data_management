@@ -2,6 +2,7 @@ import pandas as pd
 import time
 import re
 import numpy as np
+import ast
 
 
 keywords = ['values', 'academics', 'academic', 'skills', 'skill', 'purpose', 'purposes',
