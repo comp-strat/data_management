@@ -112,8 +112,13 @@ def filter_pages(school_pages, MIN_HITCOUNT = 1):
     return [(p.url, p.boo, p.depth, p.text) for p in pages if dict_count2(p.text)>=MIN_HITCOUNT]
     # return [page for page in set(school_pages) if dict_count2(page[3])>=MIN_HITCOUNT] # maintains tuples but does not handle case where tuple is different but text is same
 def run_filter(type, MIN_HITCOUNT = 1):
+    """Runs filter of given type. Creates checkpoint file with column of filtered pages. Column name is of form 'CMO_FILTERED_TEXT#' for type 'c' and 'FILTERED_TEXT#' for type 'w' where # is min hit count.
+
+    type: column to run filter on. 'c' for CMO_WEBTEXT, 'w' for 'WEBTEXT'
+    MIN_HITCOUNT: min hit count to pass filter
+    """
     if type == 'w':
-        print('WEBTEXT Page filter start. Min hitcount: {:d}'.format(MIN_HITCOUNT))
+        print('WEBTEXT Page filter start. Min hit count: {:d}'.format(MIN_HITCOUNT))
         filtered_pages = []
         start = time.time()
         for i, row in enumerate(df_charter['WEBTEXT'].values):
@@ -122,8 +127,11 @@ def run_filter(type, MIN_HITCOUNT = 1):
                 end = time.time()
                 print('Time Elapsed:{:f}, Percent Complete:{:f}'.format(end - start,i*100/len(df_charter)))
         df_charter['FILTERED_TEXT' + str(MIN_HITCOUNT)] = pd.Series(filtered_pages, index=df_charter.index)
+        ckpt_file_path = 'charters_full_2015{:s}{:d}_checkpoint1.pkl'.format(type,MIN_HITCOUNT)
+        df_charter.to_pickle(ckpt_file_path) # checkpoint file contains new column 'FILTERED_TEXT'
+        print('Completed text filtering. Saved checkpoint to ' + 'charters_full_2015{:s}{:d}_checkpoint1.pkl'.format(type,MIN_HITCOUNT))
     elif type == 'c':
-        print('CMO_WEBTEXT Page filter start. Min hitcount: {:d}'.format(MIN_HITCOUNT))
+        print('CMO_WEBTEXT Page filter start. Min hit count: {:d}'.format(MIN_HITCOUNT))
         filtered_pages = []
         start = time.time()
         for i, row in enumerate(df_charter['CMO_WEBTEXT'].values):
@@ -132,10 +140,9 @@ def run_filter(type, MIN_HITCOUNT = 1):
                 end = time.time()
                 print('Time Elapsed:{:f}, Percent Complete:{:f}'.format(end - start,i*100/len(df_charter)))
         df_charter['CMO_FILTERED_TEXT' + str(MIN_HITCOUNT)] = pd.Series(filtered_pages, index=df_charter.index)
-
         ckpt_file_path = 'charters_full_2015{:s}{:d}_checkpoint1.pkl'.format(type,MIN_HITCOUNT)
         df_charter.to_pickle(ckpt_file_path) # checkpoint file contains new column 'FILTERED_TEXT'
-        print('Completed text filtering 2. Saved checkpoint to ' + 'charters_full_2015{:s}{:d}_checkpoint1.pkl'.format(type,MIN_HITCOUNT))
+        print('Completed text filtering. Saved checkpoint to ' + 'charters_full_2015{:s}{:d}_checkpoint1.pkl'.format(type,MIN_HITCOUNT))
 
 class Page:
     def __init__(self,p):
