@@ -4,7 +4,6 @@ import re
 import numpy as np
 
 
-MIN_HITCOUNT = 2 # min hit count for filtering pages
 keywords = ['values', 'academics', 'academic', 'skills', 'skill', 'purpose', 'purposes',
                        'direction', 'mission', 'vision', 'visions', 'missions',
                        'ideals', 'cause', 'causes', 'curriculum', 'curricular',
@@ -19,7 +18,10 @@ keywords = ['values', 'academics', 'academic', 'skills', 'skill', 'purpose', 'pu
 
 charter_path = '../../charters_full_2015.pkl'
 df_charter = pd.read_pickle(charter_path)
-df_charter[['WEBTEXT','CMO_WEBTEXT']]=df_charter[['WEBTEXT','CMO_WEBTEXT']].fillna('') # turn nan to empty list/string for future convenience
+df_charter['WEBTEXT']=df_charter['WEBTEXT'].fillna('') # turn nan to empty list/string for future convenience
+df_charter['CMO_WEBTEXT'] = df_charter['CMO_WEBTEXT'].fillna('0') # ugly hack so that we can apply literal_eval on column later
+df_charter['CMO_WEBTEXT'] = df_charter['CMO_WEBTEXT'].apply(ast.literal_eval) # apply to whole column
+df_charter['CMO_WEBTEXT'] = df_charter['CMO_WEBTEXT'].replace(0, '') # now all nan are '' in both WEBTEXT columns
 
 # Optimized dict_count attempt for cases where entries in 'custom_dict' have long word lengths
 
@@ -99,38 +101,67 @@ def dict_count2(text):
             counts+=1
     return counts
 
-def filter_pages(school_pages):
-    """Returns the list of page text with hit count at least min hit count. Note this eliminates the tuple representation in WEBTEXT
+def filter_pages(school_pages, MIN_HITCOUNT = 1):
+    """Returns the list of page text with hit count at least min hit count.
 
-    Also filters out duplicate tuples in WEBTEXT using set. Does not account for case where tuple is not exactly the same but
-    text itself is the same.
+    Also filters out duplicate text.
     school_pages: entry of 'webtext' column
     """
-    pages = set([p[3] for p in school_pages])
-    return [page for page in set(pages) if dict_count2(page)>=MIN_HITCOUNT]
+    pages = set([Page(p) for p in school_pages])
+    return [(p.url, p.boo, p.depth, p.text) for p in pages if dict_count2(p.text)>=MIN_HITCOUNT]
     # return [page for page in set(school_pages) if dict_count2(page[3])>=MIN_HITCOUNT] # maintains tuples but does not handle case where tuple is different but text is same
+def run_filter(type, MIN_HITCOUNT = 1):
+    if type == 'w':
+        print('WEBTEXT Page filter start. Min hitcount: {:d}'.format(MIN_HITCOUNT))
+        filtered_pages = []
+        start = time.time()
+        for i, row in enumerate(df_charter['WEBTEXT'].values):
+            filtered_pages.append(filter_pages(row, 2))
+            if i%1000 == 0:
+                end = time.time()
+                print('Time Elapsed:{:f}, Percent Complete:{:f}'.format(end - start,i*100/len(df_charter)))
+        df_charter['FILTERED_TEXT' + str(MIN_HITCOUNT)] = pd.Series(filtered_pages, index=df_charter.index)
+    elif type = 'c':
+        print('CMO_WEBTEXT Page filter start. Min hitcount: {:d}'.format(MIN_HITCOUNT))
+        filtered_pages = []
+        start = time.time()
+        for i, row in enumerate(df_charter['CMO_WEBTEXT'].values):
+            filtered_pages.append(filter_pages(row, 2))
+            if i%1000 == 0:
+                end = time.time()
+                print('Time Elapsed:{:f}, Percent Complete:{:f}'.format(end - start,i*100/len(df_charter)))
+        df_charter['CMO_FILTERED_TEXT' + str(MIN_HITCOUNT)] = pd.Series(filtered_pages, index=df_charter.index)
 
+        ckpt_file_path = 'charters_full_2015{:s}{:d}_checkpoint1.pkl'.format(type,MIN_HITCOUNT)
+        df_charter.to_pickle(ckpt_file_path) # checkpoint file contains new column 'FILTERED_TEXT'
+        print('Completed text filtering 2. Saved checkpoint to ' + 'charters_full_2015{:s}{:d}_checkpoint1.pkl'.format(type,MIN_HITCOUNT))
 
-print('Page filter start')
-filtered_pages = []
-start = time.time()
-for i, row in enumerate(df_charter['WEBTEXT'].values):
-    filtered_pages.append(filter_pages(row))
-    if i%1000 == 0:
-        end = time.time()
-        print('Time Elapsed:{:f}, Percent Complete:{:f}'.format(end - start,i*100/len(df_charter)))
-df_charter['FILTERED_TEXT'] = pd.Series(filtered_pages)
-# df_charter['FILTERED_TEXT'] = df_charter['WEBTEXT'].apply(filter_pages) # create column containing filtered pages
+class Page:
+    def __init__(self,p):
+        self.url = p[0]
+        self.boo = p[1]
+        self.depth = p[2]
+        self.text = p[3]
+    def __repr__(self):
+        return self.text
+    def __eq__(self, other):
+        if isinstance(other, Page):
+            return self.text == other.text
+        else:
+            return False
+    def __ne__(self, other):
+        return (not self.__eq__(other))
+    def __hash__(self):
+        return hash(self.__repr__())
 
-ckpt_file_path = 'charters_full_2015_checkpoint1.pkl'
-df_charter.to_pickle(ckpt_file_path) # checkpoint file contains new column 'FILTERED_TEXT'
-print('Completed text filtering. Saved checkpoint to charters_full_2015_checkpoint1.pkl')
+run_filter('w', 2)
+run_filter('c', 2)
 
-df_charter['REPLACED'] = df_charter.astype(str)['FILTERED_TEXT'] == '[]' # need at least 1 page per school else take cmo page
+df_charter['REPLACED'] = df_charter.astype(str)['FILTERED_TEXT2'] == '[]' # need at least 1 page per school else take cmo page
+df_charter.loc[df_charter['REPLACED'].values,'FILTERED_TEXT2'] = df_charter.loc[df_charter['REPLACED'].values,'CMO_FILTERED_TEXT2']  # replace empty FILTERED_TEXT with corresponding CMO_FILTERED_TEXT
 df_right = df_charter.groupby('CMO_NAME')['REPLACED'].sum() > 0 # df to be merged to the right of df_charter
 df_right.columns = ['CMO_REPLACED'] # CMO_REPLACED tells us whether the CMO contains a school that replaced its webtext
 df_right.reset_index(level = ['CMO_NAME'])
-df_right = df_right[['CMO_NAME', 'CMO_REPLACED']] # maybe not necessary
 df_result = pd.merge(df_charter, df_right, how = 'left', on = ['CMO_NAME']) # now CMO_REPLACED tells us if the school belongs to a CMO
                                                                # that replaced one its schools webtexts
 ckpt_file_path = 'charters_full_2015_checkpoint2.pkl'
