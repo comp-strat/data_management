@@ -121,7 +121,7 @@ def run_filter(type, MIN_HITCOUNT = 1):
                 end = time.time()
                 print('Time Elapsed:{:f}, Percent Complete:{:f}'.format(end - start,i*100/len(df_charter)))
         df_charter['FILTERED_TEXT' + str(MIN_HITCOUNT)] = pd.Series(filtered_pages, index=df_charter.index)
-    elif type = 'c':
+    elif type == 'c':
         print('CMO_WEBTEXT Page filter start. Min hitcount: {:d}'.format(MIN_HITCOUNT))
         filtered_pages = []
         start = time.time()
