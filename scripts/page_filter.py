@@ -136,7 +136,7 @@ def filter_pages(school_pages, MIN_HITCOUNT = 1):
         return (filtered, False)
     else:
         if max_hc == 0:
-            return ([t[0] in all_tuples if t[0][2] == min_depth], True)
+            return ([t[0] for t in all_tuples if t[0][2] == min_depth], True)
         return ([t[0] for t in all_tuples if t[1] == max_hc], True)
     # return [page for page in set(school_pages) if dict_count2(page[3])>=MIN_HITCOUNT] # maintains tuples but does not handle case where tuple is different but text is same
 def run_filter(type, MIN_HITCOUNT = 1):
