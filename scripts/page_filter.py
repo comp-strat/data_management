@@ -3,6 +3,7 @@ import time
 import re
 import numpy as np
 import ast
+import sys
 
 
 keywords = ['values', 'academics', 'academic', 'skills', 'skill', 'purpose', 'purposes',
@@ -16,7 +17,16 @@ keywords = ['values', 'academics', 'academic', 'skills', 'skill', 'purpose', 'pu
                        'doors opened', 'school opened', 'about us', 'our school', 'who we are',
                        'identity', 'identities', 'profile', 'highlights']
 
-
+keywords_values = {'values':2, 'academics':1, 'academic':1, 'skills':1, 'skill':1, 'purpose':2, 'purposes':2,
+                       'direction':1, 'mission':2, 'vision':2, 'visions':2, 'missions':2,
+                       'ideals':2, 'cause':1, 'causes':1, 'curriculum':2, 'curricular':2,
+                       'method':1, 'methods':1, 'pedagogy':2, 'pedagogical':1, 'pedagogies':1, 'approach':1, 'approaches':1, 'model':2, 'models':2, 'system':2, 'systems':2,
+                       'structure':1, 'structures':1, 'philosophy':2, 'philosophical':2, 'philosophies':2, 'beliefs':2, 'believe':2, 'belief':2,
+                       'principles':2, 'principle':2, 'creed':2, 'creeds':2, 'credo':2, 'moral':2, 'morals':2, 'morality':2, 'history':1, 'histories':1, 'our story':1,
+                       'the story':1, 'school story':1, 'background':1, 'backgrounds':1, 'founding':1, 'founded':1, 'foundation':1, 'foundations':1, 'foundational':1,
+                       'established':1,'establishment':1, 'our school began':1, 'we began':1,
+                       'doors opened':1, 'school opened':1, 'about us':2, 'our school':1, 'who we are':1,
+                       'identity':1, 'identities':1, 'profile':1, 'highlights':2}
 charter_path = '../../charters_full_2015.pkl'
 df_charter = pd.read_pickle(charter_path)
 df_charter['WEBTEXT']=df_charter['WEBTEXT'].fillna('') # turn nan to empty list/string for future convenience
@@ -94,12 +104,12 @@ def dict_count2(text):
         for i in range(len(splitted_phrase) - length + 1):
             entry = ' '.join(splitted_phrase[i:i+length]) # Builds chunk of 'length' words without ending space
             if entry in keywords:
-                counts += 1
+                counts += keywords_values[entry]
     mask = [[word == entry for word in splitted_phrase] for entry in large_first_words]
     indices = np.transpose(np.nonzero(mask))
     for ind in indices:
         if ind[1] <= (len(splitted_phrase) - large_lengths[ind[0]]) and large_words[ind[0]] == splitted_phrase[ind[1] : ind[1] + large_lengths[ind[0]]]:
-            counts+=1
+            counts += keywords_values[large_keywords[ind[0]]]
     return counts
 
 def filter_pages(school_pages, MIN_HITCOUNT = 1):
@@ -109,7 +119,25 @@ def filter_pages(school_pages, MIN_HITCOUNT = 1):
     school_pages: entry of 'webtext' column
     """
     pages = set([Page(p) for p in school_pages])
-    return [(p.url, p.boo, p.depth, p.text) for p in pages if dict_count2(p.text)>=MIN_HITCOUNT]
+    all_tuples = []
+    filtered = []
+    max_hc = -1
+    min_depth = 99999
+    for p in pages:
+        hit_count = dict_count2(p.text)
+        if hit_count >= MIN_HITCOUNT:
+            filtered.append((p.url, p.boo, p.depth, p.text))
+        if max_hc < hit_count:
+            max_hc = hit_count
+        if min_depth > p.depth:
+            min_depth = p.depth
+        all_tuples.append(((p.url, p.boo, p.depth, p.text),hit_count))
+    if  filtered:
+        return (filtered, False)
+    else:
+        if max_hc == 0:
+            return ([t[0] in all_tuples if t[0][2] == min_depth], True)
+        return ([t[0] for t in all_tuples if t[1] == max_hc], True)
     # return [page for page in set(school_pages) if dict_count2(page[3])>=MIN_HITCOUNT] # maintains tuples but does not handle case where tuple is different but text is same
 def run_filter(type, MIN_HITCOUNT = 1):
     """Runs filter of given type. Creates checkpoint file with column of filtered pages. Column name is of form 'CMO_FILTERED_TEXT#' for type 'c' and 'FILTERED_TEXT#' for type 'w' where # is min hit count.
@@ -120,29 +148,63 @@ def run_filter(type, MIN_HITCOUNT = 1):
     if type == 'w':
         print('WEBTEXT Page filter start. Min hit count: {:d}'.format(MIN_HITCOUNT))
         filtered_pages = []
+        s = []
         start = time.time()
         for i, row in enumerate(df_charter['WEBTEXT'].values):
-            filtered_pages.append(filter_pages(row, 2))
+            result = filter_pages(row, MIN_HITCOUNT)
+            filtered_pages.append(result[0])
+            s.append(result[1])
             if i%1000 == 0:
                 end = time.time()
                 print('Time Elapsed:{:f}, Percent Complete:{:f}'.format(end - start,i*100/len(df_charter)))
-        df_charter['FILTERED_TEXT' + str(MIN_HITCOUNT)] = pd.Series(filtered_pages, index=df_charter.index)
+        df_charter['WEBTEXT'] = pd.Series(filtered_pages, index=df_charter.index)
+        df_charter['WEBTEXT_EMPTY'] = pd.Series(s, index=df_charter.index)
         ckpt_file_path = 'charters_full_2015{:s}{:d}_checkpoint1.pkl'.format(type,MIN_HITCOUNT)
         df_charter.to_pickle(ckpt_file_path) # checkpoint file contains new column 'FILTERED_TEXT'
-        print('Completed text filtering. Saved checkpoint to ' + 'charters_full_2015{:s}{:d}_checkpoint1.pkl'.format(type,MIN_HITCOUNT))
+        print('Completed text filtering. Saved checkpoint to ' + ckpt_file_path)
     elif type == 'c':
         print('CMO_WEBTEXT Page filter start. Min hit count: {:d}'.format(MIN_HITCOUNT))
         filtered_pages = []
+        s = []
         start = time.time()
         for i, row in enumerate(df_charter['CMO_WEBTEXT'].values):
-            filtered_pages.append(filter_pages(row, 2))
+            result = filter_pages(row, MIN_HITCOUNT)
+            filtered_pages.append(result[0])
+            s.append(result[1])
             if i%1000 == 0:
                 end = time.time()
                 print('Time Elapsed:{:f}, Percent Complete:{:f}'.format(end - start,i*100/len(df_charter)))
-        df_charter['CMO_FILTERED_TEXT' + str(MIN_HITCOUNT)] = pd.Series(filtered_pages, index=df_charter.index)
+        df_charter['CMO_WEBTEXT'] = pd.Series(filtered_pages, index=df_charter.index)
+        df_charter['CMO_WEBTEXT_EMPTY'] = pd.Series(s, index=df_charter.index)
         ckpt_file_path = 'charters_full_2015{:s}{:d}_checkpoint1.pkl'.format(type,MIN_HITCOUNT)
         df_charter.to_pickle(ckpt_file_path) # checkpoint file contains new column 'FILTERED_TEXT'
-        print('Completed text filtering. Saved checkpoint to ' + 'charters_full_2015{:s}{:d}_checkpoint1.pkl'.format(type,MIN_HITCOUNT))
+        print('Completed text filtering. Saved checkpoint to ' + ckpt_file_path)
+    elif type == 'a':
+        print('Complete Page filter start. Min hit count: {:d}'.format(MIN_HITCOUNT))
+        filtered_pages = []
+        s = []
+        start = time.time()
+        for i, row in enumerate(df_charter['WEBTEXT'].values):
+            result = filter_pages(row, MIN_HITCOUNT)
+            if result[1]:
+                result_cmo = filter_pages(df_charter.loc[df_charter.index[i], 'CMO_WEBTEXT'])
+                if result_cmo[1]:
+                    filtered_pages.append(result[0])
+                    s.append(2)
+                else:
+                    filtered_pages.append(result_cmo[0])
+                    s.append(1)
+            else:
+                filtered_pages.append(result[0])
+                s.append(0)
+            if i%1000 == 0:
+                end = time.time()
+                print('Time Elapsed:{:f}, Percent Complete:{:f}'.format(end - start,i*100/len(df_charter)))
+        df_charter['WEBTEXT'] = pd.Series(filtered_pages, index=df_charter.index)
+        df_charter['WEBTEXT_METHOD'] = pd.Series(s, index=df_charter.index) # 2 empty webtext, empty cmo_webtext, 1 empty_webtext, non empty cmo_webtext, 0 nonempty webtext
+        ckpt_file_path = 'charters_full_2015{:s}{:d}_checkpoint1.pkl'.format(type,MIN_HITCOUNT)
+        df_charter.to_pickle(ckpt_file_path) # checkpoint file contains new column 'FILTERED_TEXT'
+        print('Completed text filtering. Saved checkpoint to ' + ckpt_file_path)
 
 class Page:
     def __init__(self,p):
@@ -162,16 +224,20 @@ class Page:
     def __hash__(self):
         return hash(self.__repr__())
 
-run_filter('w', 2)
-run_filter('c', 2)
-
-df_charter['REPLACED'] = df_charter.astype(str)['FILTERED_TEXT2'] == '[]' # need at least 1 page per school else take cmo page
-df_charter.loc[df_charter['REPLACED'].values,'FILTERED_TEXT2'] = df_charter.loc[df_charter['REPLACED'].values,'CMO_FILTERED_TEXT2']  # replace empty FILTERED_TEXT with corresponding CMO_FILTERED_TEXT
-df_right = df_charter.groupby('CMO_NAME')['REPLACED'].sum() > 0 # df to be merged to the right of df_charter
-df_right.columns = ['CMO_REPLACED'] # CMO_REPLACED tells us whether the CMO contains a school that replaced its webtext
-df_right.reset_index(level = ['CMO_NAME'])
-df_result = pd.merge(df_charter, df_right, how = 'left', on = ['CMO_NAME']) # now CMO_REPLACED tells us if the school belongs to a CMO
-                                                               # that replaced one its schools webtexts
-ckpt_file_path = 'charters_full_2015_checkpoint2.pkl'
-df_result.to_pickle(ckpt_file_path)
-print('Completed CMO_REPLACED')
+# only checks filter type not min hit score. min hit score must be covertible to float
+if sys.argv[1] == 'c':
+    run_filter('c', float(sys.argv[2]))
+elif sys.argv[1] == 'w':
+    run_filter('w', float(sys.argv[2]))
+elif sys.argv[1] == 'a':
+    run_filter('a', float(sys.argv[2]))
+    df_charter['REPLACED'] = df_charter['WEBTEXT_METHOD'] == 1 # replaced wtih CMO filtered pages
+    df_right = df_charter.groupby('CMO_NAME')['REPLACED'].sum() > 0 # df to be merged to the right of df_charter
+    df_right.columns = ['CMO_REPLACED'] # CMO_REPLACED tells us whether the CMO contains a school that replaced its webtext
+    df_right.reset_index(level = ['CMO_NAME'])
+    df_charter = pd.merge(df_charter, df_right, how = 'left', on = ['CMO_NAME']) # now CMO_REPLACED tells us if the school belongs to a CMO that replaced one its schools webtexts with cmo text
+    ckpt_file_path = 'charters_full_2015{:s}{:d}.pkl'.format('a',float(sys.argv[2]))
+    df_charter.to_pickle(ckpt_file_path) # checkpoint file contains new column 'FILTERED_TEXT'
+    print('Completed text filtering. Saved checkpoint to ' + ckpt_file_path)
+else:
+    print('Invalid type. Use c, w, or a for cmo_webtext, webtext, and complete filtering, respectively.')
