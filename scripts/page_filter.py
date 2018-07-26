@@ -159,7 +159,7 @@ def run_filter(type, MIN_HITCOUNT = 1.0):
                 print('Time Elapsed:{:f}, Percent Complete:{:f}'.format(end - start,i*100/len(df_charter)))
         df_charter['WEBTEXT'] = pd.Series(filtered_pages, index=df_charter.index)
         df_charter['WEBTEXT_EMPTY'] = pd.Series(s, index=df_charter.index)
-        ckpt_file_path = 'charters_full_2015{:s}{:f}_checkpoint1.pkl'.format(type,MIN_HITCOUNT)
+        ckpt_file_path = 'charters_full_2015{:s}{:d}_checkpoint1.pkl'.format(type,round(10*MIN_HITCOUNT))
         df_charter.to_pickle(ckpt_file_path) # checkpoint file contains new column 'FILTERED_TEXT'
         print('Completed text filtering. Saved checkpoint to ' + ckpt_file_path)
     elif type == 'c':
@@ -176,7 +176,7 @@ def run_filter(type, MIN_HITCOUNT = 1.0):
                 print('Time Elapsed:{:f}, Percent Complete:{:f}'.format(end - start,i*100/len(df_charter)))
         df_charter['CMO_WEBTEXT'] = pd.Series(filtered_pages, index=df_charter.index)
         df_charter['CMO_WEBTEXT_EMPTY'] = pd.Series(s, index=df_charter.index)
-        ckpt_file_path = 'charters_full_2015{:s}{:f}_checkpoint1.pkl'.format(type,MIN_HITCOUNT)
+        ckpt_file_path = 'charters_full_2015{:s}{:d}_checkpoint1.pkl'.format(type,round(10*MIN_HITCOUNT))
         df_charter.to_pickle(ckpt_file_path) # checkpoint file contains new column 'FILTERED_TEXT'
         print('Completed text filtering. Saved checkpoint to ' + ckpt_file_path)
     elif type == 'a':
@@ -202,8 +202,8 @@ def run_filter(type, MIN_HITCOUNT = 1.0):
                 print('Time Elapsed:{:f}, Percent Complete:{:f}'.format(end - start,i*100/len(df_charter)))
         df_charter['WEBTEXT'] = pd.Series(filtered_pages, index=df_charter.index)
         df_charter['WEBTEXT_METHOD'] = pd.Series(s, index=df_charter.index) # 2 empty webtext, empty cmo_webtext, 1 empty_webtext, non empty cmo_webtext, 0 nonempty webtext
-        ckpt_file_path = 'charters_full_2015{:s}{:f}_checkpoint1.pkl'.format(type,MIN_HITCOUNT)
-        df_charter.to_pickle(ckpt_file_path) # checkpoint file contains new column 'FILTERED_TEXT'
+        ckpt_file_path = 'charters_full_2015{:s}{:d}_checkpoint1.pkl'.format(type,round(MIN_HITCOUNT*10))
+        df_charter.to_pickle(ckpt_file_path) # checkpoint file contains modified 'WEBTEXT' column
         print('Completed text filtering. Saved checkpoint to ' + ckpt_file_path)
 
 class Page:
@@ -236,7 +236,7 @@ elif sys.argv[1] == 'a':
     df_right.columns = ['CMO_REPLACED'] # CMO_REPLACED tells us whether the CMO contains a school that replaced its webtext
     df_right.reset_index(level = ['CMO_NAME'])
     df_charter = pd.merge(df_charter, df_right, how = 'left', on = ['CMO_NAME']) # now CMO_REPLACED tells us if the school belongs to a CMO that replaced one its schools webtexts with cmo text
-    ckpt_file_path = 'charters_full_2015{:s}{:f}.pkl'.format('a',float(sys.argv[2]))
+    ckpt_file_path = 'charters_full_2015{:s}{:d}.pkl'.format('a',round(float(sys.argv[2])*10))
     df_charter.to_pickle(ckpt_file_path) # checkpoint file contains new column 'FILTERED_TEXT'
     print('Completed text filtering. Saved checkpoint to ' + ckpt_file_path)
 else:
