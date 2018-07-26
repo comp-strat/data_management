@@ -129,8 +129,8 @@ def filter_pages(school_pages, MIN_HITCOUNT = 1):
             filtered.append((p.url, p.boo, p.depth, p.text))
         if max_hc < hit_count:
             max_hc = hit_count
-        if min_depth > p.depth:
-            min_depth = p.depth
+        if min_depth > int(p.depth):
+            min_depth = int(p.depth)
         all_tuples.append(((p.url, p.boo, p.depth, p.text),hit_count))
     if  filtered:
         return (filtered, False)
@@ -180,7 +180,7 @@ def run_filter(type, MIN_HITCOUNT = 1.0):
         df_charter.to_pickle(ckpt_file_path) # checkpoint file contains new column 'FILTERED_TEXT'
         print('Completed text filtering. Saved checkpoint to ' + ckpt_file_path)
     elif type == 'a':
-        print('Complete Page filter start. Min hit count: {:f}'.format(MIN_HITCOUNT))
+        print('Complete Page filter start. Min hit score: {:f}'.format(MIN_HITCOUNT))
         filtered_pages = []
         s = []
         start = time.time()
