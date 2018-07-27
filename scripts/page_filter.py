@@ -236,7 +236,7 @@ elif sys.argv[1] == 'a':
     df_right = df_right.reset_index()
     df_right.rename(columns={"REPLACED": "CMO_REPLACED"},inplace=True)
     df_charter = pd.merge(df_charter, df_right, how = 'left', on = ['CMO_NAME'])
-    ckpt_file_path = 'charters_full_2015{:d}.pkl'.format(round(MIN_HITCOUNT*10))
+    ckpt_file_path = 'charters_full_2015_{:d}.pkl'.format(round(float(sys.argv[2])*10))
     df_charter.to_pickle(ckpt_file_path) # checkpoint file contains new 'CMO_REPLACED','WEBTEXT_METHOD', and filtered 'WEBTEXT' columns
     print('Completed text filtering. Saved checkpoint to ' + ckpt_file_path)
 else:
