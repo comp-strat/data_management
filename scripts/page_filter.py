@@ -187,7 +187,7 @@ def run_filter(type, MIN_HITCOUNT = 1.0):
         for i, row in enumerate(df_charter['WEBTEXT'].values):
             result = filter_pages(row, MIN_HITCOUNT)
             if result[1]:
-                result_cmo = filter_pages(df_charter.loc[df_charter.index[i], 'CMO_WEBTEXT'])
+                result_cmo = filter_pages(df_charter.loc[df_charter.index[i], 'CMO_WEBTEXT'],MIN_HITCOUNT)
                 if result_cmo[1]:
                     filtered_pages.append(result[0])
                     s.append(2)
@@ -233,11 +233,11 @@ elif sys.argv[1] == 'a':
     run_filter('a', float(sys.argv[2]))
     df_charter['REPLACED'] = df_charter['WEBTEXT_METHOD'] == 1 # replaced wtih CMO filtered pages
     df_right = df_charter.groupby('CMO_NAME')['REPLACED'].sum() > 0 # df to be merged to the right of df_charter
-    df_right.columns = ['CMO_REPLACED'] # CMO_REPLACED tells us whether the CMO contains a school that replaced its webtext
-    df_right.reset_index(level = ['CMO_NAME'])
-    df_charter = pd.merge(df_charter, df_right, how = 'left', on = ['CMO_NAME']) # now CMO_REPLACED tells us if the school belongs to a CMO that replaced one its schools webtexts with cmo text
-    ckpt_file_path = 'charters_full_2015{:s}{:d}.pkl'.format('a',round(float(sys.argv[2])*10))
-    df_charter.to_pickle(ckpt_file_path) # checkpoint file contains new column 'FILTERED_TEXT'
+    df_right = df_right.reset_index()
+    df_right.rename(columns={"REPLACED": "CMO_REPLACED"},inplace=True)
+    df_charter = pd.merge(df_charter, df_right, how = 'left', on = ['CMO_NAME'])
+    ckpt_file_path = 'charters_full_2015{:d}.pkl'.format(round(MIN_HITCOUNT*10))
+    df_charter.to_pickle(ckpt_file_path) # checkpoint file contains new 'CMO_REPLACED','WEBTEXT_METHOD', and filtered 'WEBTEXT' columns
     print('Completed text filtering. Saved checkpoint to ' + ckpt_file_path)
 else:
     print('Invalid type. Use c, w, or a for cmo_webtext, webtext, and complete filtering, respectively.')
