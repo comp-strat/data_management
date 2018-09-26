@@ -18,9 +18,9 @@ from sklearn.model_selection import train_test_split # For splitting into train/
 import sys # For terminal tricks
 
 ## Define file paths
-charters_path = "../../charters_full_2015_15_250_counts.pkl" # All text data; only charter schools (regardless if open or not)
-train_path = "../../nowdata/traincf_2015_15_250_counts.pkl" # Training set (80% of data)
-test_path = "../../nowdata/ignore/testcf_2015_15_250_counts.pkl"
+charters_path = "../../nowdata/charters_full_2015_250_new_counts.pkl" # All text data; only charter schools (regardless if open or not)
+train_path = "../../nowdata/traincf_2015_250_new_counts.pkl" # Training set (80% of data)
+test_path = "../../nowdata/ignore/testcf_2015_250_new_counts.pkl"
 
 # Load charter data into DF
 gc.disable() # disable garbage collector
