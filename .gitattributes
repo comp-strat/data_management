@@ -3,5 +3,8 @@
 *.pkl filter=lfs diff=lfs merge=lfs -text
 *.shp filter=lfs diff=lfs merge=lfs -text
 *.json filter=lfs diff=lfs merge=lfs -text
+<<<<<<< HEAD
 data/*
 data/old/*
+=======
+>>>>>>> 52ba36a5de7ad8a95b6b5e41c6420c4fb30b1cbe
