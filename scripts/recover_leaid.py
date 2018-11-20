@@ -1,39 +1,33 @@
-
 # coding: utf-8
 
-# # Recover LEAID by geographical info
-# 
-# Authors: Ji Shi, Jiahua Zou, Jaren Haber <br>
-# Institution: UC Berkeley <br>
+# Recover LEAID by geographical info
+ 
+# Authors: Ji Shi, Jiahua Zou, Jaren Haber
+# Institution: UC Berkeley
 # Contact: jhaber@berkeley.edu
-# 
-# Created: Nov. 12, 2018 <br>
+ 
+# Created: Nov. 12, 2018
 # Last modified: Nov. 19, 2018
-# 
+
 # Description: Geographically identifies each public school's LEAID (Local Education Agency Identification Code) by locating that school's latitude and longitude coordinates within school district shapefiles. Given that NCES school data lists for many schools--especially charter schools--an LEAID with legal but not geographic significance, this geographic matching allows analysis of each school within the community (school district) context in which it is physically situated. 
 
-# ## Initialize
 
-# In[1]:
-
+# Initialize
 
 import pandas as pd
 import numpy as np
 import os
+import gc # Makes loading pickle files faster 
+import sys # Script tricks (like exiting)
 
-
-# In[2]:
-
+from tqdm import tqdm # Shows progress over iterations, including in pandas via "progress_apply"
+tqdm.pandas(desc="Matching coords->LEAIDs") # To show progress, create & register new `tqdm` instance with `pandas`
 
 try:
     from shapely.geometry import Point, Polygon
 except ImportError:
     get_ipython().system("pip install shapely # if module doesn't exist, then install")
     from shapely.geometry import Point, Polygon
-
-
-# In[3]:
-
 
 try:
     import geopandas as gpd
@@ -42,98 +36,51 @@ except ImportError:
     import geopandas as gpd
 
 
-# In[4]:
+# Define helper functions
+
+def quickpickle_load(picklepath):
+    '''Very time-efficient way to load pickle-formatted objects into Python.
+    Uses C-based pickle (cPickle) and gc workarounds to facilitate speed. 
+    Input: Filepath to pickled (*.pkl) object.
+    Output: Python object (probably a list of sentences or something similar).'''
+
+    with open(picklepath, 'rb') as loadfile:
+        
+        gc.disable() # disable garbage collector
+        outputvar = cPickle.load(loadfile) # Load from picklepath into outputvar
+        gc.enable() # enable garbage collector again
+    
+    return outputvar
 
 
-import gc # Makes loading pickle files faster 
-gc.disable() # Disable garbage collector
-char_sch = pd.read_pickle("../nowdata/charters_2015.pkl")
-gc.enable() # Re-enable garbage collector
+def quickpickle_dump(dumpvar, picklepath):
+    '''Very time-efficient way to dump pickle-formatted objects from Python.
+    Uses C-based pickle (cPickle) and gc workarounds to facilitate speed. 
+    Input: Python object (probably a list of sentences or something similar).
+    Output: Filepath to pickled (*.pkl) object.'''
 
+    with open(picklepath, 'wb') as destfile:
+        
+        gc.disable() # disable garbage collector
+        cPickle.dump(dumpvar, destfile) # Dump dumpvar to picklepath
+        gc.enable() # enable garbage collector again
+        
 
-# In[5]:
+# Load data
+    
+print("Loading data...")
+chartersdf = quickpickle_load("../../nowdata/charters_2015.pkl") # Charter school data (mainly NCES CCD PSUS, 2015-16)
+#pubsdf = quickpickle_load("../../nowdata/pubschools_2015.pkl") # Charter school data (mainly NCES CCD PSUS, 2015-16)
+sddata = quickpickle_load("../data/US_sd_combined_2016.pkl") # School district shapefiles (2016)
+acs = pd.read_csv("../data/ACS_2016_sd-merged_FULL.csv", header = [0, 1], encoding="latin1", low_memory=False) # School district social data (ACS, 2012-16)
 
-
-# Inspect the file:
-print(char_sch.shape)
-print(list(char_sch))
-char_sch
-
-
-# In[39]:
-
-
-# These latitude & longitude coordinates do correspond to the matching address:
-char_sch[["ADDRESS1516", "LAT1516", "LON1516"]][:20]
-
-
-# In[7]:
-
-
-cf = pd.read_pickle("districtchangedlol.pkl")
-
-
-# In[8]:
-
-
-#check if geometry type is Polygon
-cf.loc[0, "geometry"]
-
-
-# In[33]:
-
-
-# Save school district shapes, identifiers for use later:
-sdshapes = cf["geometry"]
-sdid = cf["FIPS"]
-sdshapes[0]
-
-
-# In[34]:
-
-
-sdshapes[:5]
-
-
-# In[35]:
-
-
-sdid[:5]
-
-
-# In[27]:
-
-
-# Load ACS file:
-acs = pd.read_csv("../data_management/data/ACS_2016_sd-merged_FULL.csv", header = [0, 1], encoding="latin1", low_memory=False)
-
-# Inspect the file:
-print(acs.shape)
-print(list(acs))
-acs["FIPS"].astype(int)
-
-
-# In[28]:
-
-
-print(char_sch['LEAID'].dropna().apply(lambda x: int(x)))
-print(acs.FIPS.astype(int))
-
-
-# In[29]:
-
-
-#We want to recover the LEAID that do not appear in ACS_2016_sd-merged_FULL.csv
-#Turns out all LEAID in charters15 do not appear in ACS_2016_sd-merged_FULL.csv
-#So we have to recover all of them
-
-char_sch["in_acs"] = char_sch['LEAID'].dropna().apply(lambda x: int(x) in acs.FIPS.astype(int))
-print(sum(char_sch["in_acs"]))
-
-
-# In[51]:
-
-
+# Save school district shapes & identifiers for use later:
+sdshapes = sddata["geometry"]
+sdid = sddata["FIPS"]        
+        
+        
+# Define core function
+        
 def mapping_leaid(cord, original):
     '''This method takes in the coordinates of a certain school and search for all 
        school districts to see whether there is a school district contain the coordinates 
@@ -155,113 +102,47 @@ def mapping_leaid(cord, original):
 
     for i in range(len(sdshapes)):
         
-#         if cf.loc[i, "FIPS"] == original:
-#             print(i)
-#             print(cf.loc[i, "FIPS"])
-#             print(sdshapes[i].contains(Point((cord[1], cord[0]))))
-
-        #LAT and LONG indeed reversed!
-        #fixed below
-        if sdshapes[i].contains(Point((cord[1], cord[0]))):
+        # Note: LAT & LON coordinates appear reversed when invoked with Point for gpd()
+        if sdshapes[i].contains(Point((cord[1], cord[0]))): 
             #print('Find a school district!')
             if sdid.loc[i] != original:
-                print(sdid.loc[i], "vs.", original, "- changed!")
+                #print(sdid.loc[i], "vs.", original, "- changed!")
                 return sdid.loc[i]
-            print(sdid.loc[i], "vs.", original)
+            #print(sdid.loc[i], "vs.", original)
             return sdid.loc[i]
     return original
 
 
-# In[59]:
+# Execute core function
+
+#pubsdf['GEO_LEAID'] = pubsdf[["LAT1516", 'LON1516','LEAID']].progress_apply(lambda x: mapping_leaid((x["LAT1516"], x['LON1516']), x['LEAID']), axis=1)
+chartersdf['GEO_LEAID'] = chartersdf[["LAT1516", 'LON1516','LEAID']].progress_apply(lambda x: mapping_leaid((x["LAT1516"], x['LON1516']), x['LEAID']), axis=1)
 
 
-#Choose some schools to test differences between original LEAID and newly found LEAID
-char_sch.loc[0:100, ['LAT1516', 'LON1516','LEAID']].apply(lambda x: mapping_leaid((x["LAT1516"],x['LON1516']), x['LEAID']), axis=1)
+# Merge ACS data again using new LEAID
+
+print("Merging ACS data using new 'GEO_LEAID'...")
+
+# Get list of ACS vars to drop from school dfs (to avoid risk of duplication):
+acsvars_ch, acsvars_pub = [], []
+for var in list(acs):
+    if var[1] in list(pubsdf):
+        acsvars_ch.append(var[1])
+    if var[1] in list(chartersdf):
+        acsvars_pub.append(var[1])
+
+acs["GEO_LEAID"] = acs[("FIPS", "Geo_FIPS")] # Simplifies merging process
+chartersdf = chartersdf.drop(acsvars_ch, axis=1) # Drop ACS vars
+chartersdf = pd.merge(chartersdf, acs, how="left", on="GEO_LEAID")
+#pubsdf = pubsdf.drop(acsvars_pub, axis=1) # Drop ACS vars
+#pubsdf = pd.merge(pubsdf, acs, how="left", on="GEO_LEAID")
 
 
-# In[52]:
+# Save modified data to disk
 
+print("Saving data to disk...")
+#quickpickle_dump(pubsdf, "../nowdata/backups/charters_full_2015_250_v2a_unlappedtext_counts3_geoleaid.pkl")
+quickpickle_dump(chartersdf, "../nowdata/backups/pubschools_full_2015_v2a_geoleaid.pkl")
+print("...done.")
 
-# check randomly picked 401460.0 vs. 400016.0
-# The original schools labeled 400016.0
-char_sch[char_sch['LEAID'] == 400016.0][['URL','SCH_NAME', 'LAT1516', 'LON1516']]
-
-
-# In[52]:
-
-
-#The school district found by our algorithm
-cf[cf['FIPS'] == 401460.0]
-
-
-# In[54]:
-
-
-#The school district of the original label 400016.0
-cf[cf['FIPS'] == 400016.0]
-
-
-# **_I checked the google map and found that the five schools above are indeed physically in the school district found by our algorithm. But I don't know why our original LEAID (in this case 401460) does not correspond to any school district._**
-
-# In[57]:
-
-
-print(char_sch.shape)
-list(char_sch)
-
-
-# In[62]:
-
-
-char_sch[char_sch["LEAID"] == 400016.0][["LEAID", "URL", "LAT1516", "LON1516", "LOCALE15", "ADDRESS16"]]
-
-
-# In[ ]:
-
-
-#Please run again.
-char_sch['GEO_LEAID'] = char_sch[["LAT1516", 'LON1516','LEAID']].apply(lambda x: mapping_leaid((x["LAT1516"],x['LON1516']), x['LEAID']), axis=1)
-
-
-# In[58]:
-
-
-# Check out the resulting DF:
-print(char_sch[["LAT1516","LON1516", "LEAID", "GEO_LEAID"]].isna().apply(sum))
-char_sch[["LAT1516","LON1516", "LEAID", "GEO_LEAID"]]
-
-
-# In[42]:
-
-
-char_sch.to_pickle("../nowdata/backups/charters_full_2015_250_v2a_unlappedtext_counts3_geoleaid.pkl")
-
-
-# ## Prep for multiprocessing (probably not necessary)
-
-# In[ ]:
-
-
-# Import packages for multiprocessing
-get_ipython().system('pip install tqdm # for monitoring progress of multiprocessing')
-numcpus = len(os.sched_getaffinity(0)) # Detect and assign number of available CPUs
-from multiprocessing import Pool # key function for multiprocessing, to increase processing speed
-pool = Pool(processes=numcpus) # Pre-load number of CPUs into pool function
-
-
-# In[24]:
-
-
-tuplist = [tuple(x) for x in char_sch[["NCESSCH", "LAT1516", "LON1516", "LEAID"]].values]
-tuplist
-
-
-# In[ ]:
-
-
-# Use multiprocessing.Pool(numcpus) to run your function:
-print("Matching schools with LEAID based on LAT/LON coordinates:
-if __name__ == '__main__':
-    with Pool(numcpus) as p:
-        p.map(mapping_leaid(), tqdm(tuplist, desc="Matching LAT/LON to LEAID")) 
-
+sys.exit() # Exit script (to be safe)
