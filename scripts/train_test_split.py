@@ -35,7 +35,7 @@ df = pd.read_csv(stats_path, low_memory=False)
 gc.enable() # enable garbage collector again
 
 ## Split data into 80% for training and 20% for test using random sample
-proptest = 0.2 # fraction of 0.2 = 20% test set
+proptest = 0.4 # fraction of 0.4 = 40% test set
 print("Creating " + str((1-proptest)*100) + "/" + str(proptest*100) + " train/test split...")
 traindf, testdf = train_test_split(df, test_size = proptest, random_state = 0)
 

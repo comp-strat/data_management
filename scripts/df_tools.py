@@ -10,6 +10,7 @@
 
 # Import packages & functions:
 import pandas
+import numpy
 from quickpickle import quickpickle_dump, quickpickle_load # For quickly loading & saving pickle files in Python
 
 
@@ -106,3 +107,26 @@ def load_filtered_df(dfpath, keepcols):
         check_df(newdf, "NCESSCH")
     
     return newdf
+
+
+def replace_df_nulls(DF, null_list):
+    """For each column in input DataFrame, replace with null and values in null_list.
+    
+    Args:
+        DataFrame to replace missing values with null,
+        List of values to replace with null.
+    
+    Returns:
+        Cleaned DataFrame."""
+    
+    for col in list(DF):
+        before_nulls = DF[col].isnull().sum()
+        
+        for nullentry in null_list:
+            DF[col] = DF[col].replace(nullentry, numpy.nan)
+            
+        after_nulls = DF[col].isnull().sum()
+        change = after_nulls - before_nulls
+        print(str(col) + ": " + str(change) + " nulls found, now " + str(after_nulls) + " (" + str(after_nulls/len(DF[col])) + "%) nulls total.")
+            
+    return DF

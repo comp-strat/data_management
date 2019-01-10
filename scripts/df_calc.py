@@ -21,9 +21,9 @@ def density_calc(somedf, fulldf, groupvar, uniqueid, filtervar):
     Useful for calculating the density of charter & public schools in a given school district.
     
     Args: 
-        Specific (and detailed) DataFrame, 
+        Specific (and detailed) DataFrame to merge to, 
         more general DF (for context info, e.g. all public schools), 
-        variable to group by (e.g., school district LEAID), 
+        column to group by (e.g., school district LEAID), 
         unique identifier for each entity (e.g., NCES school #),
         variable to filter by (e.g., charter identifier).
     Returns: 
@@ -32,7 +32,7 @@ def density_calc(somedf, fulldf, groupvar, uniqueid, filtervar):
     # Use filtering variable to filter to more specific level (i.e., to only charter schools)
     filtered_df = fulldf[fulldf[filtervar] == 1]
     
-    # Keep only relevant variables from fulldf for finding density (not necessary if fulldf already trimmed)
+    # Keep only relevant variables from fulldf for finding density
     fulldf = fulldf[[groupvar, uniqueid]]
     
     # Generate 2-element DFs grouped by groupvar, both total and filtered, 
@@ -50,24 +50,37 @@ def density_calc(somedf, fulldf, groupvar, uniqueid, filtervar):
     return total_density, filtered_density
 
 
-def closerate_calc(openclosedf, groupvar, openvar, closevar):
-    """
+def closerate_calc(somedf, openclosedf, groupvar, openvar, closevar, uniqueid, startbound, endbound):
+    """Calculates closure rate for entities that share a given grouping variable, for each year from startbound to endbound. 
+    Useful for calculating closure rates (# of entities closed between year-1 and year) of public schools. 
     
     Args:
-        DataFrame with variable for year opened and year opened,
-        variable to group by (e.g., school district GEO_LEAID), 
-        variable indicating when entity opened  (e.g., YEAR_OPENED), 
-        variable indicating when entity closed, if at all (e.g., YEAR_CLOSED). 
+        Specific (and detailed) DataFrame to merge to,
+        DataFrame listing all entities (e.g., all public schools) with integer columns for year opened and year opened (between two years indicated),
+        column to group by (e.g., school district "GEO_LEAID"), 
+        column indicating when entity opened  (e.g., "YEAR_OPENED"), 
+        column indicating when entity closed, if at all (e.g., "YEAR_CLOSED"),
+        unique identifier for each entity (e.g., NCES school #),
+        first year to find closure rates (e.g., 1999),
+        last year to find closure rates (e.g., 2016). 
         
     Returns:
-        """
+        DataFrame containing: 
+            groupvar, 
+            close rate within groupvar each year (# entities closed between year-1 and year)."""
+    
+    # Trim input DFs to only relevant variables for finding close rates and merging
+    somedf = somedf[[groupvar, uniqueid]]
+    openclosedf = openclosedf[[groupvar, uniqueid, openvar, closevar]]
     
     #Create two mappings
-    #  1. groupvar - list of number of schools opened in each year
+    #  1. groupvar - list of number of schools opened in each year (don't return this)
     #  2. groupvar - list of number of schools closed in each year
 
     numSch_map = {} #{groupvar: [year99opened, year00opened, ..., year2016opened]}
     closed_map = {} #{groupvar: [year99closed, year00closed,..., year16closed]}
+    span = (int(endbound) - int(startbound)) + 1
+    
     for index, row in openclosedf.iterrows():
         thisid = row[groupvar]
         open_year = row[openvar] if not numpy.isnan(row[openvar]) else 0  #let year be 0 if not found
@@ -76,16 +89,16 @@ def closerate_calc(openclosedf, groupvar, openvar, closevar):
             continue
 
         if thisid in numSch_map:
-            for i in range(0, 18):
+            for i in range(0, span):
                 #if i is in the range of open years for some school, add it into the corresponding map
-                if open_year <= 1999 + i and (close_year == 0 or close_year >= 1999 + i):
+                if open_year <= (startbound + i) and (close_year == 0 or close_year >= (startbound + i)):
                     numSch_map[thisid][i] += 1
-                if close_year == 1999 + i:
+                if close_year == (startbound + i):
                     closed_map[thisid][i] += 1
         else:
             numSch_map[thisid] = []
             closed_map[thisid] = []
-            for i in range(0, 18):
+            for i in range(0, span):
                 numSch_map[thisid].append(0)
                 closed_map[thisid].append(0)
            
@@ -115,30 +128,18 @@ def closerate_calc(openclosedf, groupvar, openvar, closevar):
     df_closeSchool = df_closeSchool.transpose()
     df_closeRate = df_closeRate.transpose()
     
-    # Create two dictionary to rename the columns
-    dic1 = {0:'close99', 1:'close00', 2:'close01', 3:'close02', 4:'close03', 5:'close04', 6:'close05', 7:'close06', \
-           8:'close07',9:'close08', 10:'close09', 11:'close10', 12:'close11', 13:'close12', 14:'close13', 15:'close14', \
-           16:'close15', 17:'close16'}
-    dic2 = {0:'close_rate99', 1:'close_rate00', 2:'close_rate01', 3:'close_rate02', 4:'close_rate03', 5:'close_rate04', 6:'close_rate05', 7:'close_rate06', \
-           8:'close_rate07',9:'close_rate08', 10:'close_rate09', 11:'close_rate10', 12:'close_rate11', 13:'close_rate12', 14:'close_rate13', 15:'close_rate14', \
-           16:'close_rate15', 17:'close_rate16'}
-    
-    # Rename the two dataframe using the dictionaries created above
-    df_closeSchool = df_closeSchool.rename(columns = dic1)
-    df_closeRate = df_closeRate.rename(columns = dic2)
-    
     # Turn the groupvar from index to a new column
     df_closeSchool[groupvar] = df_closeSchool.index
     df_closeRate[groupvar] = df_closeRate.index
     
-    # Merge the closed school dataframe and the close rate dataframe
-    merged_close = pandas.merge(df_closeSchool, df_closeRate, on=[groupvar])
-    
     # Let the groupvar column appear at the front
-    mid = merged_close[groupvar]
-    merged_close.drop(labels=[groupvar], axis=1,inplace = True)
-    merged_close.insert(0, groupvar, mid)
+    mid = df_closeRate[groupvar]
+    df_closeRate.drop(labels=[groupvar], axis=1,inplace = True)
+    df_closeRate.insert(0, groupvar, mid)
     
+    # Create closerate columns matched to original DF
+    somedf = pandas.merge(somedf, df_closeRate, how='outer', on=[groupvar])
     
-    
-    return merged_close
+    print("Returning DF of closure rates for each year from " + str(startbound) + " to " + str(endbound) + ", indexed by digits from 0 to " + str(int(endbound) - int(startbound)) + "...")
+          
+    return somedf
