@@ -9,5 +9,6 @@ List of data sources:
 - [Civil Rights Data Collection (CRDC)](https://www2.ed.gov/about/offices/list/ocr/data.html)
 - [Partisan Voting Index (PVI)](https://cookpolitical.com/pvi-0)
 
-Approximate visual of data generation process:
+Overview of data generation workflow:
 
+![data generation workflow](tools/workflow.png)
