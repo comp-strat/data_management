@@ -1,5 +1,5 @@
 # data_management
-Code and data for URAP team that collects and merges charter schools’ information.
+Code for managing large data sets in Python, usually with Pandas. These scripts mostly merge, filter, inspect, and count things. Developed for a charter school database of 10K+ units based on web-crawling and federal data sources (CCD, ACS, etc).
 
 List of data sources:
 - Web data collected by author & URAP team
