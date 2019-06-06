@@ -1,3 +1,14 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# Author: Jaren Haber, PhD Candidate
+# Institution (as of this writing): University of California, Berkeley, Dept. of Sociology
+# Date created: Fall 2018
+# Date last modified: June 6, 2019 
+# Source GitHub repo: https://github.com/jhaber-zz/data_management/
+# Modified for: https://github.com/h2researchgroup/Computational-Analysis-For-Social-Science
+# Description: Essential functions for text preprocessing, e.g. as in training word embeddings or topic models. The core function cleans sentences by removing stopwords, etc.; elementary functions create lists of stopwords, punctuation, and unicode; a wish-list function gathers most common words from a text corpus.
+
 # Import packages
 import re, datetime
 import string # for one method of eliminating punctuation
