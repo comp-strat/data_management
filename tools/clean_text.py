@@ -93,10 +93,16 @@ def stopwords_make(vocab_path_old = "", extend_stopwords = False):
                  "7thgrader", "8thgrader", "9thgrader", "10thgrader", "11thgrader", "12thgrader"]
     with open(vocab_path_old) as f: # Load vocab from previous model
         junk_words = f.read().splitlines() 
-    junk_words = [word for word in junk_words[:8511] if ((not "_" in word) 
+    
+    if school_whitelist == True:
+        junk_words = [word for word in junk_words[:8511] if ((not "_" in word) 
                                                          and (not any(term in word for term in whitelist)))]
+        stop_word_list.extend(junk_words)                                      
+        return stop_word_list
+        
+    junk_words = [word for word in junk_words[:8511] if ((not "_" in word))
     stop_word_list.extend(junk_words)
-                                                     
+                  
     return stop_word_list
                                                      
     
