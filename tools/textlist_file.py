@@ -13,7 +13,7 @@ import pandas as pd
 
 
 def write_list(file_path, textlist):
-    """Writes textlist to file_path.
+    """Writes textlist to file_path. Useful for recording output of parse_school().
     Input: Path to file, list of strings
     Output: Nothing (saved to disk)"""
     
