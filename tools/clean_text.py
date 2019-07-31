@@ -153,24 +153,24 @@ stop_words_list = stopwords_make()
 punctstr = punctstr_make()
 unicode_list = unicode_make()
 
-#nlp = spacy.load('en') # Instantiate spacy object for part of speech tagging (to remove proper nouns)
+# Instantiate spacy object for part of speech tagging (to remove proper nouns)
+nlp = spacy.load('en', disable=['ner']) # For speed, keep only POS tagging functionality and parsing (which improves accuracy). Does including NER also improve accuracy? 
 
-
-def gather_propernouns(doc):
+def gather_propernouns(text):
     """ Creates a list of the propernouns in the sentence.
     Args:
         docs: Spacy object of sentence  
     Returns:
         List of proper nouns in the sentence."""
                   
-    new_doc = []
-    for word in doc:
+    new_text = []
+    for word in text:
         if word.tag == "NNP" or word.tag == "NNPS":
-            new_doc.append(word)
-    return new_doc
+            new_text.append(word)
+    return new_text
 
 
-def clean_sentence(sentence, remove_stopwords = True, remove_numbers = True, keep_english = False, fast = False, exclude_words = [], stemming=False, unhyphenate=False, remove_acronyms=True, remove_propernouns = True):
+def clean_sentence(sentence, remove_stopwords = True, remove_numbers = True, keep_english = False, slow_webclean = False, exclude_words = [], stemming = False, remove_acronyms = True, remove_propernouns = True, unhyphenate = False, return_string = False):
     """Removes numbers, emails, URLs, unicode characters, hex characters, and punctuation from a sentence 
     separated by whitespaces. Returns a tokenized, cleaned list of words from the sentence.
     
@@ -179,14 +179,16 @@ def clean_sentence(sentence, remove_stopwords = True, remove_numbers = True, kee
         remove_stopwords: whether to remove stopwords, default True
         remove_numbers: whether to remove any chars that are digits, default True
         keep_english: whether to remove words not in english dictionary, default False; if 'restrictive', keep word only if in NLTK's dictionary of 237K english words; if 'permissive', keep word only if in longer list of 436K english words
-        fast: whether to skip advanced sentence cleaning, removing emails, URLs, and unicode and hex chars, default False
+        slow_webclean: whether to include advanced sentence cleaning: removing emails, URLs, and unicode and hex chars, default False
         exclude_words: list of words to exclude, may be most common words or named entities, default empty list
         stemming: whether to apply PorterStemmer to each word, default False
         remove_propernouns: boolean, removes nouns such as names, etc., default True 
+        unhyphenate: join any lingering hyphens (i.e., words ending with '- ') as for JSTOR text data, default False
+        return_string: return string instead of list of tokens (useful for infersent), default False
     Returns: 
         Cleaned & tokenized sentence, i.e. a list of cleaned, lower-case, one-word strings"""
     
-    global stop_words_list, punctstr, unicode_list, english_nltk, english_long#, nlp
+    global stop_words_list, punctstr, unicode_list, english_nltk, english_long, nlp
     
     # Replace unicode spaces, tabs, and underscores with spaces, and remove whitespaces from start/end of sentence:
     sentence = sentence.replace(u"\xa0", u" ").replace(u"\\t", u" ").replace(u"_", u" ").strip(" ")
@@ -205,8 +207,7 @@ def clean_sentence(sentence, remove_stopwords = True, remove_numbers = True, kee
             for i in range(len(ls)):
                 sentence = sentence.replace(ls[i], ls_new[i])
     
-    
-    if not fast:
+    if slow_webclean:
         # Remove hex characters (e.g., \xa0\, \x80):
         sentence = re.sub(r'[^\x00-\x7f]', r'', sentence) #replace anything that starts with a hex character 
 
@@ -215,14 +216,14 @@ def clean_sentence(sentence, remove_stopwords = True, remove_numbers = True, kee
 
         # Remove all elements that appear in unicode_list (looks like r'u1000|u10001|'):
         sentence = re.sub(r'|'.join(map(re.escape, unicode_list)), '', sentence)
-    
-    sentence = re.sub("\d+", "", sentence) # Remove numbers
     
     # If True, include the proper nouns in stop_words_list
     if remove_propernouns:              
         doc = nlp(sentence) # Create a document object in spacy
         proper_nouns = gather_propernouns(doc) # Creates a wordbank of proper nouns we should exclude
-        
+        for term in proper_nouns: # Loop over wordbank
+            sentence = re.sub(term, "", sentence) # Remove each proper noun from sentence
+
     
     sent_list = [] # Initialize empty list to hold tokenized sentence (words added one at a time)
     
@@ -231,10 +232,10 @@ def clean_sentence(sentence, remove_stopwords = True, remove_numbers = True, kee
         word = word.strip() # Remove leading and trailing spaces
         
         if remove_numbers:
-            word = re.sub(r"[0-9]+", "", word) #removing any digits
+            word = re.sub(r"[0-9]+", "", word) # filter out digits
         
         # Filter out emails and URLs:
-        if not fast and ("@" in word or word.startswith(('http', 'https', 'www', '//', '\\', 'x_', 'x/', 'srcimage')) or word.endswith(('.com', '.net', '.gov', '.org', '.jpg', '.pdf', 'png', 'jpeg', 'php'))):
+        if slow_webclean and ("@" in word or word.startswith(('http', 'https', 'www', '//', '\\', 'x_', 'x/', 'srcimage')) or word.endswith(('.com', '.net', '.gov', '.org', '.jpg', '.pdf', 'png', 'jpeg', 'php'))):
             continue
             
         # Remove punctuation (only after URLs removed):
@@ -242,10 +243,7 @@ def clean_sentence(sentence, remove_stopwords = True, remove_numbers = True, kee
         
         if remove_stopwords and word in stop_words_list: # Filter out stop words
             continue
-            
-        if remove_propernouns and word in proper_nouns: # Filter out proper nouns
-            continue
-                
+                            
         # TO DO: Pass in most_common_words to function; write function to find the top 1-5% most frequent words, which we will exclude
         # Remove most common words:
         if word in exclude_words:
@@ -265,94 +263,7 @@ def clean_sentence(sentence, remove_stopwords = True, remove_numbers = True, kee
         
         sent_list.append(word.lower()) # Add lower-cased word to list (after passing checks)
 
-    return sent_list # Return clean, tokenized sentence
-                  
-                  
-def clean_sentence_infersent(sentence, remove_stopwords = True, keep_english = False, fast = False, exclude_words = [], stemming=False, unhyphenate=False, remove_acronyms=True, remove_numbers = True):
-    """Removes numbers, emails, URLs, unicode characters, hex characters, and punctuation from a sentence 
-    separated by whitespaces. Returns a tokenized, cleaned list of words from the sentence.
+    if return_string:
+        return ' '.join(sent_list) # Return clean, tokenized sentence (string)
     
-    Args: 
-        sentence, i.e. string that possibly includes spaces and punctuation
-        remove_stopwords: whether to remove stopwords, default True
-        keep_english: whether to remove words not in english dictionary, default False; if 'restrictive', keep word only if in NLTK's dictionary of 237K english words; if 'permissive', keep word only if in longer list of 436K english words
-        fast: whether to skip advanced sentence cleaning, removing emails, URLs, and unicode and hex chars, default False
-        exclude_words: list of words to exclude, may be most common words or named entities, default empty list
-        stemming: whether to apply PorterStemmer to each word, default False
-    Returns: 
-        Cleaned & tokenized sentence, i.e. a list of cleaned, lower-case, one-word strings"""
-    
-    global stop_words_list, punctstr, unicode_list, english_nltk, english_long
-    
-    # Replace unicode spaces, tabs, and underscores with spaces, and remove whitespaces from start/end of sentence:
-    sentence = sentence.replace(u"\xa0", u" ").replace(u"\\t", u" ").replace(u"_", u" ").strip(" ")
-
-
-    #conjoining the separated words from page breaks
-    if unhyphenate:
-        ls = re.findall(r"\w+-\s\w+", sentence)
-        if len(ls) > 0:
-            ls_new = [re.sub(r"- ", "", word) for word in ls]
-            for i in range(len(ls)):
-                sentence= sentence.replace(ls[i], ls_new[i])
-
-    if remove_acronyms:
-        ls = re.findall(r"\b[A-Z][A-Z]+\b\s+", sentence)
-        if len(ls) > 0:
-            ls_new = np.repeat("", len(ls))
-            for i in range(len(ls)):
-                sentence = sentence.replace(ls[i], ls_new[i])
-                  
-    if remove_numbers:
-        sentence = re.sub(r"[0-9]+", "", sentence)
-    
-    if not fast:
-        # Remove hex characters (e.g., \xa0\, \x80):
-        sentence = re.sub(r'[^\x00-\x7f]', r'', sentence) #replace anything that starts with a hex character 
-
-        # Replace \\x, \\u, \\b, or anything that ends with \u2605
-        sentence = re.sub(r"\\x.*|\\u.*|\\b.*|\u2605$", "", sentence)
-
-        # Remove all elements that appear in unicode_list (looks like r'u1000|u10001|'):
-        sentence = re.sub(r'|'.join(map(re.escape, unicode_list)), '', sentence)
-    
-    sentence = re.sub("\d+", "", sentence) # Remove numbers
-    
-    sent_list = [] # Initialize empty list to hold tokenized sentence (words added one at a time)
-    
-    for word in sentence.split(): # Split by spaces and iterate over words
-        
-        word = word.strip() # Remove leading and trailing spaces
-        
-        if remove_numbers:
-            word = re.sub(r"[0-9]+", "", word) #removing any digits
-        # Filter out emails and URLs:
-        if not fast and ("@" in word or word.startswith(('http', 'https', 'www', '//', '\\', 'x_', 'x/', 'srcimage')) or word.endswith(('.com', '.net', '.gov', '.org', '.jpg', '.pdf', 'png', 'jpeg', 'php'))):
-            continue
-            
-        # Remove punctuation (only after URLs removed):
-        word = re.sub(r"["+punctstr+"]+", r'', word).strip("'").strip("-") # Remove punctuations, and remove dashes and apostrophes only from start/end of words
-        
-        if remove_stopwords and word in stop_words_list: # Filter out stop words
-            continue
-                
-        # TO DO: Pass in most_common_words to function; write function to find the top 1-5% most frequent words, which we will exclude
-        # Remove most common words:
-        if word in exclude_words:
-            continue
-            
-        if keep_english == 'restrictive':
-            if word not in english_nltk: #Filter out non-English words using shorter list
-                continue
-            
-        if keep_english == 'permissive': 
-            if word not in english_long: #Filter out non-English words using longer list
-                continue
-        
-        # Stem word (if applicable):
-        if stemming:
-            word = ps.stem(word)
-        
-        sent_list.append(word.lower()) # Add lower-cased word to list (after passing checks)
-
-    return ' '.join(sent_list) # Return clean, tokenized sentence 
+    return sent_list # Return clean, tokenized sentence (list of tokens)
