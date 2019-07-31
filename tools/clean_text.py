@@ -17,6 +17,7 @@ from sklearn.feature_extraction import text
 from nltk.stem.porter import PorterStemmer; ps = PorterStemmer() # approximate but effective (and common) method of stemming words
 import os # for working with file trees
 import numpy as np
+import spacy 
 
 # Prep dictionaries of English words
 from nltk.corpus import words # Dictionary of 236K English words from NLTK
@@ -46,7 +47,8 @@ def stopwords_make(vocab_path_old = "", extend_stopwords = False):
     stop_word_list.append('00') 
     stop_word_list.extend(['mr', 'mrs', 'sa', 'fax', 'email', 'phone', 'am', 'pm', 'org', 'com', 
                            'Menu', 'Contact Us', 'Facebook', 'Calendar', 'Lunch', 'Breakfast', 
-                           'facebook', 'FAQs', 'FAQ', 'faq', 'faqs']) # web stopwords
+                           'facebook', 'FAQs', 'FAQ', 'faq', 'faqs', '1', '2', '3', '4', '5', '6',
+                          '7','8','9','0']) # web stopwords + numbers
     stop_word_list.extend(['el', 'en', 'la', 'los', 'para', 'las', 'san']) # Spanish stopwords
     stop_word_list.extend(['angeles', 'diego', 'harlem', 'bronx', 'austin', 'antonio']) # cities with many charter schools
 
@@ -151,7 +153,7 @@ stop_words_list = stopwords_make()
 punctstr = punctstr_make()
 unicode_list = unicode_make()
 
-nlp = spacy.load('en') # Instantiate spacy object for part of speech tagging (to remove proper nouns)
+#nlp = spacy.load('en') # Instantiate spacy object for part of speech tagging (to remove proper nouns)
 
 
 def gather_propernouns(doc):
@@ -184,7 +186,7 @@ def clean_sentence(sentence, remove_stopwords = True, remove_numbers = True, kee
     Returns: 
         Cleaned & tokenized sentence, i.e. a list of cleaned, lower-case, one-word strings"""
     
-    global stop_words_list, punctstr, unicode_list, english_nltk, english_long, nlp
+    global stop_words_list, punctstr, unicode_list, english_nltk, english_long#, nlp
     
     # Replace unicode spaces, tabs, and underscores with spaces, and remove whitespaces from start/end of sentence:
     sentence = sentence.replace(u"\xa0", u" ").replace(u"\\t", u" ").replace(u"_", u" ").strip(" ")
@@ -228,15 +230,15 @@ def clean_sentence(sentence, remove_stopwords = True, remove_numbers = True, kee
         
         word = word.strip() # Remove leading and trailing spaces
         
+        if remove_numbers:
+            word = re.sub(r"[0-9]+", "", word) #removing any digits
+        
         # Filter out emails and URLs:
         if not fast and ("@" in word or word.startswith(('http', 'https', 'www', '//', '\\', 'x_', 'x/', 'srcimage')) or word.endswith(('.com', '.net', '.gov', '.org', '.jpg', '.pdf', 'png', 'jpeg', 'php'))):
             continue
             
         # Remove punctuation (only after URLs removed):
         word = re.sub(r"["+punctstr+"]+", r'', word).strip("'").strip("-") # Remove punctuations, and remove dashes and apostrophes only from start/end of words
-        
-        if remove_numbers:
-            word = re.sub(r"\b\d+(?:\.\d+)?\s+", "", word) #removing any digits
         
         if remove_stopwords and word in stop_words_list: # Filter out stop words
             continue
@@ -322,6 +324,8 @@ def clean_sentence_infersent(sentence, remove_stopwords = True, keep_english = F
         
         word = word.strip() # Remove leading and trailing spaces
         
+        if remove_numbers:
+            word = re.sub(r"[0-9]+", "", word) #removing any digits
         # Filter out emails and URLs:
         if not fast and ("@" in word or word.startswith(('http', 'https', 'www', '//', '\\', 'x_', 'x/', 'srcimage')) or word.endswith(('.com', '.net', '.gov', '.org', '.jpg', '.pdf', 'png', 'jpeg', 'php'))):
             continue
