@@ -165,8 +165,8 @@ def gather_propernouns(text):
                   
     new_text = []
     for word in text:
-        if word.tag == "NNP" or word.tag == "NNPS":
-            new_text.append(word)
+        if word.tag_ == "NNP" or word.tag_ == "NNPS":
+            new_text.append(str(word))
     return new_text
 
 
