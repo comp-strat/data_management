@@ -23,7 +23,7 @@ import spacy
 from nltk.corpus import words # Dictionary of 236K English words from NLTK
 english_nltk = set(words.words()) # Make callable
 english_long = set() # Dictionary of 467K English words from https://github.com/dwyl/english-words
-fname =  "/vol_b/data/data_management/tools/english_words.txt" # Set file path to long english dictionary
+fname =  "/home/jovyan/work/english-words/words.txt" # Set file path to long english dictionary
 with open(fname, "r") as f:
     for word in f:
         english_long.add(word.strip())
@@ -165,8 +165,8 @@ def gather_propernouns(text):
                   
     new_text = []
     for word in text:
-        if word.tag == "NNP" or word.tag == "NNPS":
-            new_text.append(word)
+        if word.tag_ == "NNP" or word.tag_ == "NNPS":
+            new_text.append(str(word))
     return new_text
 
 
