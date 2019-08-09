@@ -28,6 +28,8 @@ with open(fname, "r") as f:
     for word in f:
         english_long.add(word.strip())
 
+#to look for proper nouns when cleaning text
+from nltk.tag import pos_tag
 
 def stopwords_make(vocab_path_old = "", extend_stopwords = False):
     """Create stopwords list. 
@@ -156,18 +158,28 @@ unicode_list = unicode_make()
 # Instantiate spacy object for part of speech tagging (to remove proper nouns)
 nlp = spacy.load('en', disable=['ner']) # For speed, keep only POS tagging functionality and parsing (which improves accuracy). Does including NER also improve accuracy? 
 
-def gather_propernouns(text):
+def gather_propernouns(sentence):
     """ Creates a list of the propernouns in the sentence.
     Args:
         docs: Spacy object of sentence  
     Returns:
         List of proper nouns in the sentence."""
                   
-    new_text = []
-    for word in text:
-        if word.tag_ == "NNP" or word.tag_ == "NNPS":
-            new_text.append(str(word))
-    return new_text
+    tagged_sentence = pos_tag(sentence.split())
+    # [('James', 'NNP'), ('likes', 'VBZ'), ('apples', 'NNPS')]
+    
+    propernouns = [word for word,pos in tagged_sentence if pos == 'NNP' or pos == 'NNPS']
+    # ['James', 'apples']
+ 
+    return propernouns
+#     new_text = []
+#     for word in text:
+#         if word.pos_ == "PROPN":
+#             new_text.append(str(word))
+#     print(new_text) # while debugging
+#     return new_text
+
+
 
 
 def clean_sentence(sentence, remove_stopwords = True, remove_numbers = True, keep_english = False, slow_webclean = False, exclude_words = [], stemming = False, remove_acronyms = True, remove_propernouns = True, unhyphenate = False, return_string = False):
@@ -219,8 +231,11 @@ def clean_sentence(sentence, remove_stopwords = True, remove_numbers = True, kee
     
     # If True, include the proper nouns in stop_words_list
     if remove_propernouns:              
-        doc = nlp(sentence) # Create a document object in spacy
-        proper_nouns = gather_propernouns(doc) # Creates a wordbank of proper nouns we should exclude
+#         doc = nlp(sentence) # Create a document object in spacy
+#         proper_nouns = gather_propernouns(doc) # Creates a wordbank of proper nouns we should exclude
+           
+        #trying to gather proper nouns by passing in pure sentence in gather_propernouns
+        proper_nouns = gather_propernouns(sentence)
         for term in proper_nouns: # Loop over wordbank
             sentence = re.sub(term, "", sentence) # Remove each proper noun from sentence
 
@@ -263,6 +278,9 @@ def clean_sentence(sentence, remove_stopwords = True, remove_numbers = True, kee
         
         sent_list.append(word.lower()) # Add lower-cased word to list (after passing checks)
 
+    #removing '' from results
+    sent_list = filter(lambda word : word != '', sent_list)
+    
     if return_string:
         return ' '.join(sent_list) # Return clean, tokenized sentence (string)
     
