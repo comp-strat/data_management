@@ -23,11 +23,13 @@ import spacy
 from nltk.corpus import words # Dictionary of 236K English words from NLTK
 english_nltk = set(words.words()) # Make callable
 english_long = set() # Dictionary of 467K English words from https://github.com/dwyl/english-words
-fname =  "/home/jovyan/work/english-words/words.txt" # Set file path to long english dictionary
+fname =  "/home/jovyan/work/data_management/tools/english-words.txt" # Set file path to long english dictionary
 with open(fname, "r") as f:
     for word in f:
         english_long.add(word.strip())
 
+#to look for proper nouns when cleaning text
+from nltk.tag import pos_tag
 
 def stopwords_make(vocab_path_old = "", extend_stopwords = False):
     """Create stopwords list. 
@@ -156,18 +158,28 @@ unicode_list = unicode_make()
 # Instantiate spacy object for part of speech tagging (to remove proper nouns)
 nlp = spacy.load('en', disable=['ner']) # For speed, keep only POS tagging functionality and parsing (which improves accuracy). Does including NER also improve accuracy? 
 
-def gather_propernouns(text):
+def gather_propernouns(sentence):
     """ Creates a list of the propernouns in the sentence.
     Args:
         docs: Spacy object of sentence  
     Returns:
         List of proper nouns in the sentence."""
                   
-    new_text = []
-    for word in text:
-        if word.tag_ == "NNP" or word.tag_ == "NNPS":
-            new_text.append(str(word))
-    return new_text
+    tagged_sentence = pos_tag(sentence.split())
+    # [('James', 'NNP'), ('likes', 'VBZ'), ('apples', 'NNPS')]
+    
+    propernouns = [word for word,pos in tagged_sentence if pos == 'NNP' or pos == 'NNPS']
+    # ['James', 'apples']
+ 
+    return propernouns
+#     new_text = []
+#     for word in text:
+#         if word.pos_ == "PROPN":
+#             new_text.append(str(word))
+#     print(new_text) # while debugging
+#     return new_text
+
+
 
 
 def clean_sentence(sentence, remove_stopwords = True, remove_numbers = True, keep_english = False, slow_webclean = False, exclude_words = [], stemming = False, remove_acronyms = True, remove_propernouns = True, unhyphenate = False, return_string = False):
@@ -188,7 +200,7 @@ def clean_sentence(sentence, remove_stopwords = True, remove_numbers = True, kee
     Returns: 
         Cleaned & tokenized sentence, i.e. a list of cleaned, lower-case, one-word strings"""
     
-    global stop_words_list, punctstr, unicode_list, english_nltk, english_long, nlp
+    global stop_words_list, punctstr, unicode_list, english_nltk, nlp, english_long
     
     # Replace unicode spaces, tabs, and underscores with spaces, and remove whitespaces from start/end of sentence:
     sentence = sentence.replace(u"\xa0", u" ").replace(u"\\t", u" ").replace(u"_", u" ").strip(" ")
@@ -219,10 +231,16 @@ def clean_sentence(sentence, remove_stopwords = True, remove_numbers = True, kee
     
     # If True, include the proper nouns in stop_words_list
     if remove_propernouns:              
-        doc = nlp(sentence) # Create a document object in spacy
-        proper_nouns = gather_propernouns(doc) # Creates a wordbank of proper nouns we should exclude
-        for term in proper_nouns: # Loop over wordbank
-            sentence = re.sub(term, "", sentence) # Remove each proper noun from sentence
+#         doc = nlp(sentence) # Create a document object in spacy
+#         proper_nouns = gather_propernouns(doc) # Creates a wordbank of proper nouns we should exclude
+           
+        #trying to gather proper nouns by passing in pure sentence in gather_propernouns
+        proper_nouns = gather_propernouns(sentence)
+        print(proper_nouns)
+        # Remove each proper noun from sentence:
+        sentence = " ".join([word for word in sentence.split() if word not in proper_nouns])
+        #for term in proper_nouns: # Loop over wordbank
+        #    sentence = re.sub(term, "", sentence) # Less effective because removes characters from within terms
 
     
     sent_list = [] # Initialize empty list to hold tokenized sentence (words added one at a time)
@@ -262,7 +280,7 @@ def clean_sentence(sentence, remove_stopwords = True, remove_numbers = True, kee
             word = ps.stem(word)
         
         sent_list.append(word.lower()) # Add lower-cased word to list (after passing checks)
-
+    
     if return_string:
         return ' '.join(sent_list) # Return clean, tokenized sentence (string)
     
