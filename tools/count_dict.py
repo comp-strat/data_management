@@ -11,7 +11,7 @@
 
 
 # FIRST: Set dictionary count parameters and file paths
-charter_path = '../misc_data/charters_2015.pkl' # path to charter school data file
+#charter_path = '../misc_data/charters_2015.pkl' # path to charter school data file
 #dict_path = '/home/jovyan/work/text_analysis/dictionary_methods/dicts/'
 #dict_names = ['inquiry30', 'discipline30'] # enter list of names of txt files holding dict
 #file_ext = '.txt'
@@ -26,11 +26,14 @@ import pandas as pd
 import re
 import numpy as np
 import time
+from tqdm import tqdm
 from nltk.stem.porter import PorterStemmer
 from nltk.tokenize import word_tokenize
 stemmer = PorterStemmer()
 stem = stemmer.stem # stemmer function
 import multiprocessing
+from functools import partial
+from itertools import repeat
 
 # For loading functions from files in data_tools directory:
 import sys; sys.path.insert(0, "../../data_management/tools/")
@@ -155,52 +158,24 @@ def dict_count(key_words, large_words, large_lengths, large_first_words, pages, 
     return counts, res_length, keycount
 
 
-def create_cols(df_charter, dict_path, dict_names, file_ext, local_dicts, local_names, stemset = 0, mp = True):
+def create_cols(df, dict_list, dict_names, text_col = "WEBTEXT", stemset = 0, mp = True):
     
     """Creates count, ratio, and strength columns for each dictionary file with [FILE_NAME]_COUNT/RATIO/STR as column name. 
-    Runs in parallel. Each process errors out when finished with "divide by zero" and "invalid value". THIS IS NORMAL.
     To calculate strengths in context with occasional zero-hit count, 1 is added to all counts. 
     Also, just in case, sets strengths with zero hit count to -6 (this shouldn't happen).
-    Optional: define local dictionaries (passed directly into function, rather than loaded from file) to count
     
     Args:
-    df_charter: DataFrame with WEBTEXT column, each of which is a list of full-text pages (not preprocessed)
-    local_dicts: list of local dictionaries formatted as last of lists of terms--or if singular, just a list of terms
-    local_names: names of local dictionaries (list or list of lists)
-    dict_path: file path to folder containing dictionaries
-    dict_names: names of dictionaries on file (list or list of lists)
-    file_ext: file extension for dictionary files (probably .txt)
+    df: DataFrame with text data, each of which is a list of full-text pages (not necessarily preprocessed)
+    dict_list: list of lists of dictionary terms, ordered same as dict_names
+    dict_names: names of dictionaries on file (list or list of lists), ordered same as dict_list
+    text_col: name column in df with text data (default "WEBTEXT")
+    clean_text: whether to quickly clean (using regex) the web pages before searching by removing non-words and underscores
     stemset: 1 for stemming before matching, 0 for no stemming
     mp: whether this function will be used in parallel via multiprocessing
     
     Returns:
-    df_charter: modified dataframe, now contains NUMWORDS, D_COUNT, D_RATIO, and D_STR (where D is taken from dict filenames)
-    
-    This function also requires one or both of these sets of global parameters to be defined:
-    local_dicts: list of local dictionaries formatted as last of lists of terms--or if singular, just a list of terms
-    local_names: names of local dictionaries (list or list of lists)
-    AND/OR
-    dict_path: file path to folder containing dictionaries
-    dict_names: names of dictionaries on file (list or list of lists)
-    file_ext: file extension for dictionary files (probably .txt)
+    df: modified dataframe, now contains NUMWORDS, D_COUNT, D_RATIO, and D_STR (where D is taken from dict filenames)
     """
-    
-    #global local_dicts, local_names # Access to local dictionaries to count (defined in notebook) and their names
-    #global dict_path, dict_names, file_ext # Access to parameters for load_dict()
-    
-    # Initialize and load dictionaries, both from file and locally:
-    if len(local_dicts) + len(dict_names)==0:
-        print("ERROR: No dictionaries detected. Stopping term counting script.")
-        return
-    if len(dict_names)>0:
-        dict_list = load_dict(dict_path, dict_names, file_ext)
-        precalc_list = dict_precalc(dict_list, stemset) # clean and sort dictionaries by length
-    else:
-        dict_list = local_dicts
-        dict_names = local_names
-    if len(dict_names)>0 and len(local_names)>0:
-        dict_list += local_dicts
-        dict_names += local_names
     
     # Initialize storing lists:
     counts = [[] for _ in range(len(dict_list))] # list of lists, each list a dictionary count per page for entity 
@@ -212,7 +187,7 @@ def create_cols(df_charter, dict_path, dict_names, file_ext, local_dicts, local_
     start = time.time()
     
     # Count occurrence of dictionary terms:
-    for i, row in enumerate(df_charter['WEBTEXT'].values):
+    for i, row in enumerate(df[text_col].values):
         pages = set([Page(p) for p in row])
         if stemset:
             pages = [[stem(x) for x in re.split('\W+|_', p.text)] for p in pages] # preprocess pages in same way as dictionaries should have been in above precalc function
@@ -225,64 +200,34 @@ def create_cols(df_charter, dict_path, dict_names, file_ext, local_dicts, local_
             res_list[j].append(res)
         if not mp and i%1000 == 0:
             end = time.time()
-            print('Time Elapsed:{:f}, Percent Complete:{:f}'.format(end - start,i*100/len(df_charter)))
+            print('Time Elapsed:{:f}, Percent Complete:{:f}'.format(end - start,i*100/len(df)))
             
     # Store and return results:
-    df_charter['NUMWORDS'] = np.array(num_words)
+    df['NUMWORDS'] = np.array(num_words)
     for i, name in enumerate(dict_names):
-        df_charter['{}_COUNT'.format(name.upper())] = np.array(counts[i])
-        df_charter['{}_RATIO'.format(name.upper())] = np.array(counts[i])/(np.array(num_words) - np.array(res_list[i]))
-        df_charter['{}_STR'.format(name.upper())] = np.log10(np.array([(row + (1)) for row in counts[i]]))/np.log10(np.array(num_words) - np.array(res_list[i]))
-    df_charter.replace([np.inf, -np.inf], -6, inplace = True)
-    return df_charter
+        df['{}_COUNT'.format(name.upper())] = np.array(counts[i])
+        df['{}_RATIO'.format(name.upper())] = np.array(counts[i])/(np.array(num_words) - np.array(res_list[i]))
+        df['{}_STR'.format(name.upper())] = np.log10(np.array([(row + (1)) for row in counts[i]]))/np.log10(np.array(num_words) - np.array(res_list[i]))
+    df.replace([np.inf, -np.inf], -6, inplace = True)
+    return df
 
 
-def count_words(df, dict_path, dict_names, file_ext, local_dicts, local_names, text_col = "WEBTEXT", cleantext = True, stemset = 0, mp = True):
-    # local_dicts = [], local_names = [], dict_path = "", dict_names = [], file_ext = ""
+def count_words(df, dict_list, dict_names, text_col = "WEBTEXT", cleantext = True, stemset = 0, mp = True):
     
     """Counts words in lists of terms (dictionaries) in a corpus.
-    Define dictionaries locally or by passing in dictionary file paths.
-    Runs in parallel. Each process errors out when finished with "divide by zero" and "invalid value". THIS IS NORMAL.
-
+  
     Args:
-    df_charter: DataFrame with text data, each of which is a list of full-text pages (not necessarily preprocessed)
-    local_dicts: list of local dictionaries formatted as last of lists of terms--or if singular, just a list of terms
-    local_names: names of local dictionaries (list or list of lists)
-    dict_path: file path to folder containing dictionaries
-    dict_names: names of dictionaries on file (list or list of lists)
-    file_ext: file extension for dictionary files (probably .txt)
-    text_col: name column in df_charter with text data
+    df: DataFrame with text data, each of which is a list of full-text pages (not necessarily preprocessed)
+    dict_list: list of lists of dictionary terms, ordered same as dict_names
+    dict_names: names of dictionaries on file (list or list of lists), ordered same as dict_list
+    text_col: name column in df with text data (default "WEBTEXT")
     clean_text: whether to quickly clean (using regex) the web pages before searching by removing non-words and underscores
     stemset: 1 for stemming before matching, 0 for no stemming
     mp: whether this function will be used in parallel via multiprocessing
     
     Returns:
     word_counts: list of lists, individual term count nested in dictionaries
-    
-    This function also requires one or both of these sets of global parameters to be defined:
-    local_dicts: list of local dictionaries formatted as last of lists of terms--or if singular, just a list of terms
-    local_names: names of local dictionaries (list or list of lists)
-    AND/OR
-    dict_path: file path to folder containing dictionaries
-    dict_names: names of dictionaries on file (list or list of lists)
-    file_ext: file extension for dictionary files (probably .txt)
     """
-    
-    #global local_dicts, local_names # Access to local dictionaries to count (defined in notebook) and their names
-    #global dict_path, dict_names, file_ext # Access to parameters for load_dict()
-    
-    # Initialize and load dictionaries, both from file and locally:
-    if len(local_dicts) + len(dict_names)==0:
-        print("ERROR: No dictionaries detected. Stopping term counting script.")
-        return
-    if len(dict_names)>0:
-        dict_list = load_dict(dict_path, dict_names, file_ext)
-    else:
-        dict_list = local_dicts
-        dict_names = local_names
-    if len(dict_names)>0 and len(local_names)>0:
-        dict_list += local_dicts
-        dict_names += local_names
     
     # Initialize storing lists:
     counts = [[] for _ in range(len(dict_list))] # list of lists, each list a dictionary count per page for entity 
@@ -315,34 +260,21 @@ def count_words(df, dict_path, dict_names, file_ext, local_dicts, local_names, t
     return key_counts
 
 
-def collect_counts(word_counts, dict_path, dict_names, file_ext, local_dicts, local_names, mp=True):
+def collect_counts(word_counts, dict_list, dict_names, mp=True):
     """Collects counts per term per dictionary--combining across entities--into DataFrames.
     
     Args:
+    word_counts: individual term counts nested in dictionaries (list of lists)--possibly nested in chunks if mp was used
     local_dicts: list of local dictionaries formatted as last of lists of terms--or if singular, just a list of terms
     local_names: names of local dictionaries (list or list of lists)
     dict_path: file path to folder containing dictionaries
     dict_names: names of dictionaries on file (list or list of lists)
     file_ext: file extension for dictionary files (probably .txt)
-    word_counts: individual term counts nested in dictionaries (list of lists)--possibly nested in chunks if mp was used
     mp: whether multiprocessing was used to collect word_counts (affects nesting)
     
     Returns: 
     dfs: list of DataFrames, one each showing counts for each dictionary counted, sorted by frequency
     """
-    
-    # Initialize and load dictionaries, both from file and locally:
-    #global dict_path, dict_names, file_ext # Access to parameters for load_dict()
-    #global local_dicts, local_names # Access to local dictionaries to count (defined in notebook) and their names
-
-    if len(dict_names)>0:
-        dict_list = load_dict(dict_path, dict_names, file_ext) # Load dictionaries from file
-    else:
-        dict_list = local_dicts
-        dict_names = local_names
-    if len(dict_names)>0 and len(local_names)>0:
-        dict_list += local_dicts # full list of dictionary names
-        dict_names += local_names # full list of dictionaries
     
     # Convert format from chunks of dictionaries of terms -> dictionaries of chunks of terms
     counts = [[] for _ in range(len(dict_names))]
@@ -357,8 +289,7 @@ def collect_counts(word_counts, dict_path, dict_names, file_ext, local_dicts, lo
     zipper = zip(dict_list, counts) # object connecting dictionaries and word counts (must be indexed the same)
     dfs = [pd.DataFrame() for _ in range(len(dict_names))] # list of DFs goes here for output
 
-    while i < len(names): # repeat as many times as there are dictionaries (using names to count)
-        print("TERM COUNTS FOR " + str(dict_names[i].upper()) + " DICTIONARY:\n")
+    while i < len(dict_names): # repeat as many times as there are dictionaries (using names to count)
         wordlist, countlist = zipper.__next__() # grab pair of zipped lists
         total = np.sum(np.array(countlist), 0) # add up all chunks of counts (from multiprocessing) to get overall counts
 
@@ -370,21 +301,24 @@ def collect_counts(word_counts, dict_path, dict_names, file_ext, local_dicts, lo
         dfs[i] = pd.DataFrame(data, columns=["TERM", "FREQUENCY"])
         dfs[i].sort_values(by = "FREQUENCY", ascending = False, inplace = True)
         i += 1
-        print("\n")
 
     return dfs
 
 
-def count_master(dict_path, dict_names, file_ext, local_dicts, local_names, termsonly = True, mp = True):
+def count_master(df, dict_path, dict_names, file_ext, local_dicts, local_names, text_col = "WEBTEXT", termsonly = True, mp = True):
     """Performs dictionary counting at both entity and dictionary levels, and collects counts.
-    NOTE: This function by default uses these global variables as defined at top of count_dict.py. To override these defaults, define these manually...
+    Dictionaries (lists of terms) must be ordered same as list of names of dictionaries. 
+    Can pass in dictionaries directly (local_dicts) or via file paths. 
+    Runs in parallel. Each process errors out when finished with "divide by zero" and "invalid value". THIS IS NORMAL.
 
     Args:
-    local_dicts: list of local dictionaries formatted as last of lists of terms--or if singular, just a list of terms
-    local_names: names of local dictionaries (list or list of lists)
+    df: DataFrame with text data, each of which is a list of full-text pages (not necessarily preprocessed)
     dict_path: file path to folder containing dictionaries
     dict_names: names of dictionaries on file (list or list of lists)
     file_ext: file extension for dictionary files (probably .txt)
+    local_dicts: list of local dictionaries formatted as last of lists of terms--or if singular, just a list of terms
+    local_names: names of local dictionaries (list or list of lists)
+    text_col: name column in df with text data (default "WEBTEXT")
     termsonly (binary): whether to only capture counts for terms (rather than entities)
     mp (binary): whether or not function will be run in parallel
 
@@ -393,44 +327,81 @@ def count_master(dict_path, dict_names, file_ext, local_dicts, local_names, term
     countsdfs: list of DataFrames, one each showing counts for each dictionary counted, sorted by frequency
     """
 
-    #global charter_path
-    #global local_dicts, local_names # Access to local dictionaries to count (defined in notebook) and their names
-    #global dict_path, dict_names, file_ext # Access to parameters for load_dict(): folder path, file names, file extension (must be consistent)
-    names = dict_names + local_names # full list of dictionaries (might be either or both file-based or local)
+    if len(dict_names)>0: # If there are dicts to be loaded from file...
+        dict_list = load_dict(dict_path, dict_names, file_ext) # Load dictionaries from file
+    elif len(dict_names)>0 and len(local_names)>0: # If there are dicts on file AND local dicts...
+        dict_list += local_dicts # full list of dictionary names
+        dict_names += local_names # full list of dictionaries
+    else: # If there are only local dicts...
+        dict_list = local_dicts
+        dict_names = local_names
     
-    df_charter1 = load_filtered_df(charter_path, ["WEBTEXT", "NCESSCH"])
-    df_charter1['WEBTEXT']=df_charter1['WEBTEXT'].fillna('') # turn nan to empty iterable for future convenience
+    
+    #df = load_filtered_df(charter_path, ["WEBTEXT", "NCESSCH"])
+    #df['WEBTEXT']=df['WEBTEXT'].fillna('') # turn nan to empty iterable for future convenience
 
     # If specified, run without multiprocessing = MUCH SLOWER (no stemming by default):
     if not mp:
         
-        if termsonly:
-            wordcounts = count_words(df_charter1, dict_path, dict_names, file_ext, local_dicts, local_names, mp = False)
-            countsdfs = collect_counts(wordcounts, dict_path, dict_names, file_ext, local_dicts, local_names, mp = False)
+        if termsonly: # Count only words per dictionary (not per entity)
+            print("Counting dictionaries per term for corpus...")
+            wordcounts = count_words(tqdm(df), dict_list, dict_names, mp = False)
+            print("Collecting counts per term per dictionary...")
+            countsdfs = collect_counts(tqdm(wordcounts), dict_list, dict_names, mp = False)
+            
+            print("Finished. Returning results.")
+            for d, dic in enumerate(dict_names):
+                print("TERM COUNTS FOR " + str(dict_names[d].upper()) + " DICTIONARY:\n")
+                print(countsdfs[d])
+
             return countsdfs
         
-        df_new = create_cols(df_charter1, dict_path, dict_names, file_ext, local_dicts, local_names, stemset = 0, mp = False)
-        wordcounts = count_words(df_charter1, dict_path, dict_names, file_ext, local_dicts, local_names, mp = False)
-        countsdfs = collect_counts(wordcounts, dict_path, dict_names, file_ext, local_dicts, local_names, mp = False)
+        print("Counting dictionary totals per entity for corpus...")
+        df_new = create_cols(tqdm(df), dict_list, dict_names, stemset = 0, mp = False)
+        print("Counting dictionaries per term for corpus...")
+        wordcounts = count_words(tqdm(df), dict_list, dict_names, mp = False)
+        print("Collecting counts per term per dictionary...")
+        countsdfs = collect_counts(tqdm(wordcounts), dict_list, dict_names, mp = False)
+        
+        print("Finished. Returning results.")
+        for d, dic in enumerate(dict_names):
+            print("TERM COUNTS FOR " + str(dict_names[d].upper()) + " DICTIONARY:\n")
+            print(countsdfs[d])
+            
         return df_new, countsdfs
 
     # Or, run in parallel using default settings (this means with multiprocessing and no stemming)
     with multiprocessing.Pool(processes = multiprocessing.cpu_count() - 1) as pool:
         
-        if termsonly:
-            # Count words per DICTIONARY (entity totals):
-            wordcounts = pool.map(count_words(dict_path, dict_names, file_ext, local_dicts, local_names), [df_charter1[300*i:i*300+300] for i in range(round(len(df_charter1)/300)+1)])
-            countsdfs = collect_counts(wordcounts, dict_path, dict_names, file_ext, local_dicts, local_names, mp = True)
+        if termsonly: # Count only words per DICTIONARY (entity totals):
+            print("Counting dictionaries per term for corpus...")
+            wordcounts = pool.map(partial(count_words, dict_list = dict_list, dict_names = dict_names, mp = True), tqdm([df[30*i:i*30+30] for i in range(round(len(df)/30)+1)]))
+            print("Multiprocessing complete. Collecting counts per term per dictionary...")
+            countsdfs = collect_counts(tqdm(wordcounts), dict_list = dict_list, dict_names = dict_names, mp = True)
+            
+            print("Finished. Returning results.")
+            for d, dic in enumerate(dict_names):
+                print("TERM COUNTS FOR " + str(dict_names[d].upper()) + " DICTIONARY:\n")
+                print(countsdfs[d])
+                
             return countsdfs
         
         # Count words per ENTITY (dictionary totals):
-        results = pool.map(create_cols(dict_path, dict_names, file_ext, local_dicts, local_names), [df_charter1[300*i:i*300+300] for i in range(round(len(df_charter1)/300)+1)])
+        print("Counting dictionary totals per entity for corpus...")
+        results = pool.map(partial(create_cols, dict_list = dict_list, dict_names = dict_names, mp = True), tqdm([df[30*i:i*30+30] for i in range(round(len(df)/30)+1)]))
+        df_new = pd.concat(results)
         # Count words per DICTIONARY (entity totals):
-        wordcounts = pool.map(count_words(dict_path, dict_names, file_ext, local_dicts, local_names), [df_charter1[300*i:i*300+300] for i in range(round(len(df_charter1)/300)+1)])
+        print("Counting dictionaries per term for corpus...")
+        wordcounts = pool.map(partial(count_words, dict_list = dict_list, dict_names = dict_names, mp = True), tqdm([df[30*i:i*30+30] for i in range(round(len(df)/30)+1)]))
 
     # Collect counts from  multiprocessing into DFs:
-    df_new = pd.concat(results[0])
-    countsdfs = collect_counts(wordcounts, dict_path, dict_names, file_ext, local_dicts, local_names, mp = True)
+    print("Multiprocessing complete. Collecting counts per term per dictionary...")
+    countsdfs = collect_counts(tqdm(wordcounts), dict_list = dict_list, dict_names = dict_names, mp = True)
+
+    print("Finished. Returning results.")
+    for d, dic in enumerate(dict_names):
+        print("TERM COUNTS FOR " + str(dict_names[d].upper()) + " DICTIONARY:\n")
+        print(countsdfs[d])
 
     return df_new, countsdfs
 
