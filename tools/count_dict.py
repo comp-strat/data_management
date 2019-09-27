@@ -6,18 +6,8 @@
 # - Authors: Brian Yimin Lei, Jaren Haber
 # - Institution: University of California, Berkeley
 # - Date created: Spring 2018
-# - Date last modified: September 26, 2019
+# - Date last modified: September 27, 2019
 # - Description: Finds the number of occurences of a dictionary phrase in the webtext of a school. Creates column for number of webtext words, ratio of hits, and hit strength(log of ratio). Also has a function to count words and display their frequencies. Has multiprocessing built in.
-
-
-# FIRST: Set dictionary count parameters and file paths
-#charter_path = '../misc_data/charters_2015.pkl' # path to charter school data file
-#dict_path = '/home/jovyan/work/text_analysis/dictionary_methods/dicts/'
-#dict_names = ['inquiry30', 'discipline30'] # enter list of names of txt files holding dict
-#file_ext = '.txt'
-#local_dicts = [] # list of local dictionaries formatted as last of lists of terms--or if singular, just a list of terms
-#local_names = [] # names of local dictionaries (list or list of lists)
-#names = dict_names + local_names # full list of dictionaries (might be either or both file-based or local)
 
 
 # ## Import packages
@@ -96,6 +86,7 @@ class Page:
         return (not self.__eq__(other))
     def __hash__(self):
         return hash(self.__repr__())
+    
     
 def dict_precalc(dict_list, stemset):
     """Cleans dictionaries and returns a list of lists of lists. 
@@ -336,10 +327,6 @@ def count_master(df, dict_path, dict_names, file_ext, local_dicts, local_names, 
         dict_list = local_dicts
         dict_names = local_names
     
-    
-    #df = load_filtered_df(charter_path, ["WEBTEXT", "NCESSCH"])
-    #df['WEBTEXT']=df['WEBTEXT'].fillna('') # turn nan to empty iterable for future convenience
-
     # If specified, run without multiprocessing = MUCH SLOWER (no stemming by default):
     if not mp:
         
@@ -407,6 +394,15 @@ def count_master(df, dict_path, dict_names, file_ext, local_dicts, local_names, 
 
 
 # ## Count dictionaries across documents
+
+# Set parameters:
+#charter_path = '../misc_data/charters_2015.pkl' # path to charter school data file
+#dict_path = '/home/jovyan/work/text_analysis/dictionary_methods/dicts/'
+#dict_names = ['inquiry30', 'discipline30'] # enter list of names of txt files holding dict
+#file_ext = '.txt'
+#local_dicts = [] # list of local dictionaries formatted as last of lists of terms--or if singular, just a list of terms
+#local_names = [] # names of local dictionaries (list or list of lists)
+#names = dict_names + local_names # full list of dictionaries (might be either or both file-based or local)
 
 #df_new, countsdfs = count_master() # execute master function
 
