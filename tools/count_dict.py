@@ -45,7 +45,6 @@ from df_calc import count_pdfs, density_calc, openclose_calc, closerate_calc
 
 def load_dict(dictpath, dictnames, fileext):
     """Loads dictionaries into list.
-    Completes dictionary to include entries with slashes ("/"), dashes ("-"), and underscores ("_") taken out.
     
     Args: 
     dictpath: path to folder containing dictionaries
@@ -53,19 +52,14 @@ def load_dict(dictpath, dictnames, fileext):
     fileext: file extension for all files (must all be the same)
     
     Returns:
-    dict_list: List of lists, where each list contains all terms for a dictionary with AND without punctuation
+    dict_list: List of lists, where each list contains all terms for a dictionary
     """
     
     dict_list = []
     for name in dictnames:
         with open(dictpath+name+fileext) as f: 
             new_dict = f.read().splitlines()
-            new_words = []
-            for entry in new_dict:
-                new_words.append(re.sub(' +|/+|-+|_+', '', entry))
-            new_dict.extend(new_words)
-            new_dict = set(new_dict)
-            dict_list.append(list(new_dict))
+            dict_list.append(list(set(new_dict)))
     return dict_list
 
 
@@ -90,18 +84,28 @@ class Page:
     
 def dict_precalc(dict_list, stemset):
     """Cleans dictionaries and returns a list of lists of lists. 
-    Each list in the returned list corresponds to a dictionary and contains five lists: 
-    key_words: each term, represented as a list, separated by punctuation;
-    large_words: a list of large words (>2 words long); 
-    large_lengths: a list of their lengths; and
-    large_first_words: list of first words of any large words in dict"""
+    Completes dictionary to include entries with slashes ("/"), dashes ("-"), and underscores ("_") taken out.
     
-    precalc_list = []
+    Args:
+    dict_list: list of lists of dictionary terms
+    stemset: whether to stem or not
+    
+    Returns:
+    precalc_list: Each list in this returned list corresponds to a dictionary and contains five lists: 
+        key_words: each term both with AND without any punctuation ( -/_), represented as a list;
+        large_words: a list of large words (>2 words long); 
+        large_lengths: a list of their lengths; and
+        large_first_words: list of first words of any large words in dict"""
+    
+    precalc_list = [] # initialize list of lists holding dict info 
+ 
     for keywords in dict_list:  
         large_words = []
         large_lengths = []
         large_first_words = []
         key_words = []
+        
+        # Separate keywords by length:
         for entry in keywords:
             if stemset:
                 word = [stem(x) for x in re.split('\W+|_+', entry.lower())]
@@ -113,6 +117,7 @@ def dict_precalc(dict_list, stemset):
                 large_lengths.append(len(word))
                 large_first_words.append(word[0]) # first words of each large entry in dict
         precalc_list.append([key_words, large_words, large_lengths, large_first_words])
+        
     return precalc_list
 
 def dict_count(key_words, large_words, large_lengths, large_first_words, pages, keycount):
@@ -130,7 +135,7 @@ def dict_count(key_words, large_words, large_lengths, large_first_words, pages, 
     res_length = 0
     # Do dictionary analysis for word chunks of lengths max_entry_length down to 1
     for splitted_phrase in pages:
-        for length in range(1, 3):
+        for length in range(1, max(large_lengths)):
             if len(splitted_phrase) < length:
                 continue # If text chunk is shorter than length of dict entries being matched, there are no matches.
             for i in range(len(splitted_phrase) - length + 1):
@@ -307,7 +312,7 @@ def count_master(df, dict_path, dict_names, file_ext, local_dicts, local_names, 
     dict_path: file path to folder containing dictionaries
     dict_names: names of dictionaries on file (list or list of lists)
     file_ext: file extension for dictionary files (probably .txt)
-    local_dicts: list of local dictionaries formatted as last of lists of terms--or if singular, just a list of terms
+    local_dicts: list of local dictionaries formatted as last of lists of terms
     local_names: names of local dictionaries (list or list of lists)
     text_col: name column in df with text data (default "WEBTEXT")
     termsonly (binary): whether to only capture counts for terms (rather than entities)
@@ -320,12 +325,26 @@ def count_master(df, dict_path, dict_names, file_ext, local_dicts, local_names, 
 
     if len(dict_names)>0: # If there are dicts to be loaded from file...
         dict_list = load_dict(dict_path, dict_names, file_ext) # Load dictionaries from file
-    elif len(dict_names)>0 and len(local_names)>0: # If there are dicts on file AND local dicts...
+    if len(dict_names)>0 and len(local_names)>0: # If there are dicts on file AND local dicts...
         dict_list += local_dicts # full list of dictionary names
         dict_names += local_names # full list of dictionaries
     else: # If there are only local dicts...
         dict_list = local_dicts
         dict_names = local_names
+        
+    # Replace underscores, dashes, slashes, & spaces in any keywords with (1) nothing or with (2) space, adding these to dictionary:
+    for d, dic in enumerate(dict_list):
+        new_words = [] # initialize
+        new_words.extend([re.sub('/+|-+|_+', ' ', entry) for entry in dic]) # replace chars with spaces
+        new_words.extend([re.sub(' +|/+|-+|_+', '', entry) for entry in dic]) # replace chars and spaces with nothing
+        dic.extend(new_words)
+        dic = list(set(dic)) # eliminate duplicates
+        '''
+        # alternative code; no list comprehension:
+        for entry in dic:
+            new_words.append(re.sub(' +|/+|-+|_+', '', entry))
+            new_words.append(re.sub(' +|/+|-+|_+', ' ', entry))
+        '''
     
     # If specified, run without multiprocessing = MUCH SLOWER (no stemming by default):
     if not mp:
@@ -351,9 +370,9 @@ def count_master(df, dict_path, dict_names, file_ext, local_dicts, local_names, 
         countsdfs = collect_counts(tqdm(wordcounts), dict_list, dict_names, mp = False)
         
         print("Finished. Returning results.")
-        for d, dic in enumerate(dict_names):
-            print("TERM COUNTS FOR " + str(dict_names[d].upper()) + " DICTIONARY:\n")
-            print(countsdfs[d])
+        #for d, dic in enumerate(dict_names):
+        #    print("TERM COUNTS FOR " + str(dict_names[d].upper()) + " DICTIONARY:\n")
+        #    print(countsdfs[d])
             
         return df_new, countsdfs
 
