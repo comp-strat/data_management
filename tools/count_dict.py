@@ -127,7 +127,7 @@ def dict_count(key_words, large_words, large_lengths, large_first_words, pages, 
     pages: set of preprocessed page lists corresponding to an entry of the 'webtext' column
     
     Returns:
-    counts: number of matches between pages (text) and key_words (dictionary terms)
+        counts: number of matches between pages (text) and key_words (dictionary terms)
     res_length: length of pages, adjusted to subtract extra words for long (>1 word) dictionary terms
     """
     
@@ -135,7 +135,7 @@ def dict_count(key_words, large_words, large_lengths, large_first_words, pages, 
     res_length = 0
     # Do dictionary analysis for word chunks of lengths max_entry_length down to 1
     for splitted_phrase in pages:
-        for length in range(1, max(large_lengths)):
+        for length in range(1, 3):
             if len(splitted_phrase) < length:
                 continue # If text chunk is shorter than length of dict entries being matched, there are no matches.
             for i in range(len(splitted_phrase) - length + 1):
@@ -323,28 +323,30 @@ def count_master(df, dict_path, dict_names, file_ext, local_dicts, local_names, 
     countsdfs: list of DataFrames, one each showing counts for each dictionary counted, sorted by frequency
     """
 
-    if len(dict_names)>0: # If there are dicts to be loaded from file...
+    file_dicts_number = len(dict_names); local_dicts_number = len(local_names) # Makes comparisons faster
+    if file_dicts_number>0: # If there are dicts to be loaded from file...
         dict_list = load_dict(dict_path, dict_names, file_ext) # Load dictionaries from file
-    if len(dict_names)>0 and len(local_names)>0: # If there are dicts on file AND local dicts...
+    if file_dicts_number>0 and local_dicts_number>0: # If there are dicts on file AND local dicts...
         dict_list += local_dicts # full list of dictionary names
         dict_names += local_names # full list of dictionaries
     else: # If there are only local dicts...
         dict_list = local_dicts
         dict_names = local_names
+    print("Loaded dictionaries: " + str(file_dicts_number) + " from file and " + str(local_dicts_number) + " locally.")
         
     # Replace underscores, dashes, slashes, & spaces in any keywords with (1) nothing or with (2) space, adding these to dictionary:
+    #new_words = [[] for _ in dict_list] # initialize new list of lists to mirror dict_list
     for d, dic in enumerate(dict_list):
-        new_words = [] # initialize
-        new_words.extend([re.sub('/+|-+|_+', ' ', entry) for entry in dic]) # replace chars with spaces
-        new_words.extend([re.sub(' +|/+|-+|_+', '', entry) for entry in dic]) # replace chars and spaces with nothing
-        dic.extend(new_words)
-        dic = list(set(dic)) # eliminate duplicates
-        '''
-        # alternative code; no list comprehension:
+        dict_list[d].extend([re.sub('/+|-+|_+', ' ', entry) for entry in dic]) # replace chars with spaces
+        dict_list[d].extend([re.sub(' +|/+|-+|_+', '', entry) for entry in dic]) # replace chars and spaces with nothing
+        #dic.extend(new_words)
+        #dict_list[d] = list(set(new_words)) 
+        '''# alternative code; no list comprehension:
         for entry in dic:
             new_words.append(re.sub(' +|/+|-+|_+', '', entry))
             new_words.append(re.sub(' +|/+|-+|_+', ' ', entry))
         '''
+    dict_list = [list(set(dic)) for dic in dict_list] # eliminate duplicates
     
     # If specified, run without multiprocessing = MUCH SLOWER (no stemming by default):
     if not mp:
@@ -356,9 +358,9 @@ def count_master(df, dict_path, dict_names, file_ext, local_dicts, local_names, 
             countsdfs = collect_counts(tqdm(wordcounts), dict_list, dict_names, mp = False)
             
             print("Finished. Returning results.")
-            for d, dic in enumerate(dict_names):
-                print("TERM COUNTS FOR " + str(dict_names[d].upper()) + " DICTIONARY:\n")
-                print(countsdfs[d])
+            #for d, dic in enumerate(dict_names):
+            #    print("TERM COUNTS FOR " + str(dict_names[d].upper()) + " DICTIONARY:\n")
+            #    print(countsdfs[d])
 
             return countsdfs
         
@@ -369,7 +371,7 @@ def count_master(df, dict_path, dict_names, file_ext, local_dicts, local_names, 
         print("Collecting counts per term per dictionary...")
         countsdfs = collect_counts(tqdm(wordcounts), dict_list, dict_names, mp = False)
         
-        print("Finished. Returning results.")
+        print("Finished counting. Returning results.")
         #for d, dic in enumerate(dict_names):
         #    print("TERM COUNTS FOR " + str(dict_names[d].upper()) + " DICTIONARY:\n")
         #    print(countsdfs[d])
@@ -378,33 +380,34 @@ def count_master(df, dict_path, dict_names, file_ext, local_dicts, local_names, 
 
     # Or, run in parallel using default settings (this means with multiprocessing and no stemming)
     with multiprocessing.Pool(processes = multiprocessing.cpu_count() - 1) as pool:
+        c = 1 # Define chunk size for CPU task allocation
         
         if termsonly: # Count only words per DICTIONARY (entity totals):
             print("Counting dictionaries per term for corpus...")
-            wordcounts = pool.map(partial(count_words, dict_list = dict_list, dict_names = dict_names, mp = True), tqdm([df[30*i:i*30+30] for i in range(round(len(df)/30)+1)]))
+            wordcounts = pool.map(partial(count_words, dict_list = dict_list, dict_names = dict_names, mp = True), tqdm([df[i*c:c*(i+1)] for i in range(round(len(df)/c)+1)]))
             print("Multiprocessing complete. Collecting counts per term per dictionary...")
             countsdfs = collect_counts(tqdm(wordcounts), dict_list = dict_list, dict_names = dict_names, mp = True)
             
-            print("Finished. Returning results.")
-            for d, dic in enumerate(dict_names):
-                print("TERM COUNTS FOR " + str(dict_names[d].upper()) + " DICTIONARY:\n")
-                print(countsdfs[d])
+            print("Finished counting. Returning results.")
+            #for d, dic in enumerate(dict_names):
+            #    print("TERM COUNTS FOR " + str(dict_names[d].upper()) + " DICTIONARY:\n")
+            #    print(countsdfs[d])
                 
             return countsdfs
         
         # Count words per ENTITY (dictionary totals):
         print("Counting dictionary totals per entity for corpus...")
-        results = pool.map(partial(create_cols, dict_list = dict_list, dict_names = dict_names, mp = True), tqdm([df[30*i:i*30+30] for i in range(round(len(df)/30)+1)]))
+        results = pool.map(partial(create_cols, dict_list = dict_list, dict_names = dict_names, mp = True), tqdm([df[i*c:c*(i+1)] for i in range(round(len(df)/c)+1)])) 
         df_new = pd.concat(results)
         # Count words per DICTIONARY (entity totals):
-        print("Counting dictionaries per term for corpus...")
-        wordcounts = pool.map(partial(count_words, dict_list = dict_list, dict_names = dict_names, mp = True), tqdm([df[30*i:i*30+30] for i in range(round(len(df)/30)+1)]))
+        #print("Counting dictionaries per term for corpus...")
+        #wordcounts = pool.map(partial(count_words, dict_list = dict_list, dict_names = dict_names, mp = True), tqdm([df[30*i:i*30+30] for i in range(round(len(df)/30)+1)]))
 
     # Collect counts from  multiprocessing into DFs:
-    print("Multiprocessing complete. Collecting counts per term per dictionary...")
-    countsdfs = collect_counts(tqdm(wordcounts), dict_list = dict_list, dict_names = dict_names, mp = True)
-
-    print("Finished. Returning results.")
+    #print("Multiprocessing complete. Collecting counts per term per dictionary...")
+    #countsdfs = collect_counts(tqdm(wordcounts), dict_list = dict_list, dict_names = dict_names, mp = True)
+    
+    print("Finished counting. Returning results.")
     for d, dic in enumerate(dict_names):
         print("TERM COUNTS FOR " + str(dict_names[d].upper()) + " DICTIONARY:\n")
         print(countsdfs[d])
