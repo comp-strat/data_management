@@ -204,6 +204,8 @@ def clean_sentence(sentence, remove_stopwords = True, remove_numbers = True, kee
     
     # Replace unicode spaces, tabs, and underscores with spaces, and remove whitespaces from start/end of sentence:
     sentence = sentence.replace(u"\xa0", u" ").replace(u"\\t", u" ").replace(u"_", u" ").strip(" ")
+    #creating list of words filtered out in jstor text-cleaning process
+    jstor_word_list = ["a", "an", "and", "are", "as", "at", "be", "but", "by", "for", "if", "in", "into", "is", "it", "no", "not", "of", "on", "or", "such", "that", "the", "their", "then", "there", "these", "they", "this", "to", "was", "will", "with"]
     
     if unhyphenate:              
         ls = re.findall(r"\w+-\s\w+", sentence)
@@ -246,6 +248,9 @@ def clean_sentence(sentence, remove_stopwords = True, remove_numbers = True, kee
         
         word = word.strip() # Remove leading and trailing spaces
         
+        if word in jstor_word_list: #filtering out words that jstor specifically cleaned out, as per Jaren & Heather's request
+            continue
+            
         if remove_numbers:
             word = re.sub(r"[0-9]+", "", word) # filter out digits
         
