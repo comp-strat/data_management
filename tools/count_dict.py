@@ -381,7 +381,7 @@ def count_master(df, dict_path, dict_names, file_ext, local_dicts, local_names, 
 
     # Or, run in parallel using default settings (this means with multiprocessing and no stemming)
     with multiprocessing.Pool(processes = multiprocessing.cpu_count() - 1) as pool:
-        c = 1 # Define chunk size for CPU task allocation
+        c = 20 # Define chunk size for CPU task allocation
         
         if termsonly: # Count only words per DICTIONARY (entity totals):
             print("Counting dictionaries per term for corpus...")
