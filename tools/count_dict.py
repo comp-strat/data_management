@@ -3,11 +3,11 @@
 
 # # Dictionary Counting Script
 
-# - Authors: Brian Yimin Lei, Jaren Haber
+# - Authors: Jaren Haber, Brian Yimin Lei
 # - Institution: University of California, Berkeley
 # - Date created: Spring 2018
-# - Date last modified: September 27, 2019
-# - Description: Finds the number of occurences of a dictionary phrase in the webtext of a school. Creates column for number of webtext words, ratio of hits, and hit strength(log of ratio). Also has a function to count words and display their frequencies. Has multiprocessing built in.
+# - Date last modified: October 21, 2019
+# - Description: Functions for finding the number of occurences of a dictionary phrase in the webtext of a school. Creates column for number of webtext words, ratio of hits, and hit strength(log of ratio). Also has a function to count words and display their frequencies. Has multiprocessing built in.
 
 
 # ## Import packages
@@ -23,10 +23,11 @@ stemmer = PorterStemmer()
 stem = stemmer.stem # stemmer function
 import multiprocessing
 from functools import partial
-from itertools import repeat
+
+root = '/home/jovyan/work/'
 
 # For loading functions from files in data_tools directory:
-import sys; sys.path.insert(0, "../../data_management/tools/")
+import sys; sys.path.insert(0, root + "data_management/tools/")
 
 # For displaying basic DF info, storing DFs for memory efficiency, and loading a filtered DF:
 from df_tools import check_df, convert_df, load_filtered_df, replace_df_nulls
@@ -329,16 +330,16 @@ def count_master(df, dict_path, dict_names, file_ext, local_dicts, local_names, 
     if file_dicts_number>0 and local_dicts_number>0: # If there are dicts on file AND local dicts...
         dict_list += local_dicts # full list of dictionary names
         dict_names += local_names # full list of dictionaries
-    else: # If there are only local dicts...
+    elif file_dicts_number==0 and local_dicts_number>0: # If there are only local dicts...
         dict_list = local_dicts
         dict_names = local_names
     print("Loaded dictionaries: " + str(file_dicts_number) + " from file and " + str(local_dicts_number) + " locally.")
         
-    # Replace underscores, dashes, slashes, & spaces in any keywords with (1) nothing or with (2) space, adding these to dictionary:
+    # Replace underscores, dashes, slashes, & spaces in any keywords with nothing, adding these to dictionary:
     #new_words = [[] for _ in dict_list] # initialize new list of lists to mirror dict_list
-    for d, dic in enumerate(dict_list):
-        dict_list[d].extend([re.sub('/+|-+|_+', ' ', entry) for entry in dic]) # replace chars with spaces
-        dict_list[d].extend([re.sub(' +|/+|-+|_+', '', entry) for entry in dic]) # replace chars and spaces with nothing
+    for dic in dict_list:
+        #dict_list[d].extend([re.sub('/+|-+|_+', ' ', entry) for entry in dic]) # replace chars with spaces
+        dic.extend([re.sub(' +|/+|-+|_+', '', entry) for entry in dic]) # replace chars and spaces with nothing
         #dic.extend(new_words)
         #dict_list[d] = list(set(new_words)) 
         '''# alternative code; no list comprehension:
@@ -408,35 +409,8 @@ def count_master(df, dict_path, dict_names, file_ext, local_dicts, local_names, 
     #countsdfs = collect_counts(tqdm(wordcounts), dict_list = dict_list, dict_names = dict_names, mp = True)
     
     print("Finished counting. Returning results.")
-    for d, dic in enumerate(dict_names):
-        print("TERM COUNTS FOR " + str(dict_names[d].upper()) + " DICTIONARY:\n")
-        print(countsdfs[d])
+    #for d, dic in enumerate(dict_names):
+    #    print("TERM COUNTS FOR " + str(dict_names[d].upper()) + " DICTIONARY:\n")
+    #    print(countsdfs[d])
 
-    return df_new, countsdfs
-
-
-# ## Count dictionaries across documents
-
-# Set parameters:
-#charter_path = '../misc_data/charters_2015.pkl' # path to charter school data file
-#dict_path = '/home/jovyan/work/text_analysis/dictionary_methods/dicts/'
-#dict_names = ['inquiry30', 'discipline30'] # enter list of names of txt files holding dict
-#file_ext = '.txt'
-#local_dicts = [] # list of local dictionaries formatted as last of lists of terms--or if singular, just a list of terms
-#local_names = [] # names of local dictionaries (list or list of lists)
-#names = dict_names + local_names # full list of dictionaries (might be either or both file-based or local)
-
-#df_new, countsdfs = count_master() # execute master function
-
-
-# ## Save results
-
-# Drop WEBTEXT to keep file size small:
-#df_new.drop(columns = "WEBTEXT", inplace=True)
-
-# Save per entity, dictionary total counts:
-#df_new.to_csv('../../charter_data/dict_counts/30counts_2015_250_v2a.csv')
-
-# Save per dictionary, entity total counts:
-#for i, df in enumerate(countsdfs):
-#    df.to_csv('../../charter_data/dict_counts/{}_terms_counts_2015_250_v2a.csv'.format(names[i]))
+    return df_new
